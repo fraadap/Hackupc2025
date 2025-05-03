@@ -141,8 +141,8 @@ const SwipeableCity = forwardRef<HTMLDivElement, SwipeableCityProps>((
           <CityCard 
             city={city} 
             showActions 
-            onLike={handleLike} 
-            onDislike={handleDislike} 
+            onTriggerLike={handleLike} 
+            onTriggerDislike={handleDislike} 
             onClick={onClick}
           />
         </AnimatedBox>

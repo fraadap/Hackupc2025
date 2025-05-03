@@ -18,16 +18,16 @@ import { City, CityCategory } from '../types';
 interface CityCardProps {
   city: City;
   showActions?: boolean;
-  onLike?: () => void;
-  onDislike?: () => void;
+  onTriggerLike?: () => void;
+  onTriggerDislike?: () => void;
   onClick?: () => void;
 }
 
 const CityCard: React.FC<CityCardProps> = ({ 
   city, 
   showActions = false, 
-  onLike, 
-  onDislike, 
+  onTriggerLike, 
+  onTriggerDislike, 
   onClick,
 }) => {
   const placeholderImage = `https://placehold.co/400x250/CBD5E0/718096?text=${encodeURIComponent(city.name)}`;
@@ -36,6 +36,21 @@ const CityCard: React.FC<CityCardProps> = ({
   const topCategories = sortedCategories.slice(0, 3);
 
   const isClickable = !!onClick;
+
+  // Button click handlers that stop propagation
+  const handleLikeButtonClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation(); // Prevent modal opening
+    if (onTriggerLike) {
+      onTriggerLike();
+    }
+  };
+
+  const handleDislikeButtonClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation(); // Prevent modal opening
+    if (onTriggerDislike) {
+      onTriggerDislike();
+    }
+  };
 
   return (
     <Box 
@@ -94,7 +109,7 @@ const CityCard: React.FC<CityCardProps> = ({
           <HStack justify="space-around" pt={3} borderTopWidth="1px" borderColor="gray.200">
             <Tooltip label="Dislike" placement="bottom">
               <Button
-                onClick={onDislike}
+                onClick={handleDislikeButtonClick}
                 variant="ghost"
                 borderRadius="full"
                 color="red"
@@ -106,7 +121,7 @@ const CityCard: React.FC<CityCardProps> = ({
             </Tooltip>
             <Tooltip label="Like" placement="bottom">
               <Button
-                onClick={onLike}
+                onClick={handleLikeButtonClick}
                 variant="ghost"
                 borderRadius="full"
                 _hover={{ bg: 'gray.100' }}

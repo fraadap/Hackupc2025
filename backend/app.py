@@ -421,11 +421,9 @@ async def get_cities_for_evaluation(
     """Get cities for initial evaluation (those not yet voted by the user)"""
     cursor = conn.cursor()
     
-    print("current_user ", current_user)
     # Get cities user has already voted on
     cursor.execute("SELECT city FROM VoteUC WHERE email = ?", (current_user["email"],))
     voted_cities = [row["city"] for row in cursor.fetchall()]
-    print(f"Cities user has already voted on: {voted_cities}")
     
     # Get cities not yet voted
     if voted_cities:
@@ -437,16 +435,13 @@ async def get_cities_for_evaluation(
         cursor.execute("SELECT name FROM City")
     
     remaining_cities = [row["name"] for row in cursor.fetchall()]
-    print(f"Remaining cities for evaluation: {len(remaining_cities)}")
-    
+
     # If no remaining cities, return empty list
     if not remaining_cities:
-        print("No remaining cities for evaluation")
         return []
     
     # Select random cities for evaluation
     selected_cities = random.sample(remaining_cities, min(limit, len(remaining_cities)))
-    print(f"Selected cities for evaluation: {selected_cities}")
     
     # Get city details
     cities = []
@@ -470,10 +465,8 @@ async def get_cities_for_evaluation(
 @app.get("/cities/{city_name}", response_model=City)
 async def get_city(city_name: str, conn = Depends(get_db)):
     cursor = conn.cursor()
-    print("city_name ", city_name)
     # Check if city exists
     cursor.execute("SELECT COUNT(*) FROM City WHERE name = ?", (city_name,))
-    print(cursor.fetchone()[0])
     if not cursor.fetchone():
         raise HTTPException(status_code=404, detail="City not found")
     
