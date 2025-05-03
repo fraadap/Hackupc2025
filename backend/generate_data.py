@@ -473,7 +473,7 @@ try:
         company = company_data["name"]
         print(f"Creating flights for company: {company}")
         # Create 25 flights per company
-        for _ in range(25):
+        for _ in range(200):
             # Select random departure and arrival cities
             dep_city = random.choice(cities)
             # Make sure arrival city is different from departure

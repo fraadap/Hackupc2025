@@ -160,7 +160,7 @@ const Dashboard: React.FC = () => {
         <Tabs index={tabIndex} onChange={handleTabsChange} isFitted variant="enclosed-colored" colorScheme="primary">
           <TabList borderTopRadius="lg">
             <Tab>Recommended Cities</Tab>
-            <Tab isDisabled={!newCityToEvaluate && !evaluationLoading}>Evaluate More Cities</Tab>
+            <Tab>Evaluate More Cities</Tab>
           </TabList>
           <TabPanels>
             <TabPanel>
@@ -222,9 +222,19 @@ const Dashboard: React.FC = () => {
                     </Text>
                   </Box>
                 ) : (
-                  <Text>
-                    Click "Evaluate More Cities" on the Recommendations tab to get started.
-                  </Text>
+                  <Center flexDirection="column" p={8}>
+                    <Text mb={4}>
+                      Ready to evaluate more cities? Click the button below to start.
+                    </Text>
+                    <Button
+                      colorScheme="primary"
+                      onClick={handleEvaluateMore}
+                      isLoading={evaluationLoading}
+                      spinner={<Spinner size="sm" />}
+                    >
+                      Load a City to Evaluate
+                    </Button>
+                  </Center>
                 )}
               </Center>
             </TabPanel>
