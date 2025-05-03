@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   Image,
@@ -11,8 +11,11 @@ import {
   Badge,
   useStyleConfig,
   Icon,
+  IconButton,
+  Spinner,
+  Center,
 } from '@chakra-ui/react';
-import { CloseIcon } from '@chakra-ui/icons';
+import { CloseIcon, ChevronLeftIcon, ChevronRightIcon } from '@chakra-ui/icons';
 import { City, CityCategory } from '../types';
 
 interface CityCardProps {
@@ -30,23 +33,49 @@ const CityCard: React.FC<CityCardProps> = ({
   onTriggerDislike, 
   onClick,
 }) => {
-  const placeholderImage = `https://placehold.co/400x250/CBD5E0/718096?text=${encodeURIComponent(city.name)}`;
-  
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [isImageLoading, setIsImageLoading] = useState(true);
+  const [imageError, setImageError] = useState(false);
+
+  const hasImages = city.image_ids && city.image_ids.length > 0;
+  const imageId = hasImages ? city.image_ids[currentImageIndex] : null;
+  const imageUrl = imageId ? `/api/images/${imageId}` : null;
+  const displayImageUrl = imageError || !imageUrl 
+    ? `https://placehold.co/400x250/CBD5E0/718096?text=${encodeURIComponent(city.name)}`
+    : imageUrl;
+
   const sortedCategories = [...city.categories].sort((a: CityCategory, b: CityCategory) => b.value - a.value);
   const topCategories = sortedCategories.slice(0, 3);
 
   const isClickable = !!onClick;
 
-  // Button click handlers that stop propagation
+  const handlePrevImage = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+    setIsImageLoading(true);
+    setImageError(false);
+    setCurrentImageIndex((prev) => 
+      prev === 0 ? city.image_ids.length - 1 : prev - 1
+    );
+  };
+
+  const handleNextImage = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+    setIsImageLoading(true);
+    setImageError(false);
+    setCurrentImageIndex((prev) => 
+      prev === city.image_ids.length - 1 ? 0 : prev + 1
+    );
+  };
+
   const handleLikeButtonClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.stopPropagation(); // Prevent modal opening
+    e.stopPropagation();
     if (onTriggerLike) {
       onTriggerLike();
     }
   };
 
   const handleDislikeButtonClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.stopPropagation(); // Prevent modal opening
+    e.stopPropagation();
     if (onTriggerDislike) {
       onTriggerDislike();
     }
@@ -74,8 +103,62 @@ const CityCard: React.FC<CityCardProps> = ({
         outlineOffset: "2px"
       } : {}}
       w="100%"
+      position="relative"
     >
-      <Image src={placeholderImage} alt={city.name} objectFit="cover" h="200px" borderTopRadius="lg" />
+      <Box position="relative" h="200px" bg="gray.200">
+        {(isImageLoading || imageError) && (
+          <Center position="absolute" inset="0" bg="rgba(255,255,255,0.5)">
+            {imageError ? <Text color="red.500">Error</Text> : <Spinner size="lg" color="primary.500"/>}
+          </Center>
+        )}
+        <Image 
+          src={displayImageUrl} 
+          alt={city.name} 
+          objectFit="cover" 
+          h="100%" 
+          w="100%"
+          borderTopRadius="lg"
+          onLoad={() => setIsImageLoading(false)}
+          onError={() => {
+            setIsImageLoading(false);
+            setImageError(true);
+            console.error(`Failed to load image: ${imageUrl}`);
+          }}
+          opacity={isImageLoading ? 0.5 : 1}
+          transition="opacity 0.3s ease-in-out"
+        />
+
+        {hasImages && city.image_ids.length > 1 && (
+          <>
+            <IconButton
+              aria-label="Previous image"
+              icon={<ChevronLeftIcon />} 
+              size="sm"
+              colorScheme="blackAlpha"
+              isRound
+              position="absolute"
+              left="10px"
+              top="50%"
+              transform="translateY(-50%)"
+              onClick={handlePrevImage}
+              zIndex={1}
+            />
+            <IconButton
+              aria-label="Next image"
+              icon={<ChevronRightIcon />} 
+              size="sm"
+              colorScheme="blackAlpha"
+              isRound
+              position="absolute"
+              right="10px"
+              top="50%"
+              transform="translateY(-50%)"
+              onClick={handleNextImage}
+              zIndex={1}
+            />
+          </>
+        )}
+      </Box>
 
       <VStack p={4} spacing={3} align="stretch" flexGrow={1}>
         <Heading as="h3" size="md">{city.name}</Heading>

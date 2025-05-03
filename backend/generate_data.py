@@ -6,6 +6,7 @@ import hashlib
 import traceback
 from faker import Faker
 import math
+import mimetypes
 
 # Initialize Faker
 fake = Faker()
@@ -23,6 +24,7 @@ def hash_password(password):
 
 # Clear existing data (for repeated runs)
 tables = [
+    "Image",
     "ImportanceUC", "VoteUC", "UGroup", "Flight", 
     "CityCateg", "User", "City", "Category", 
     "FlightCompany", "GroupTable"
@@ -670,6 +672,69 @@ for user in users:
             continue
 
 print(f"Added {votes_created} user votes for cities.")
+
+# ------------------------- IMAGE INSERTION -------------------------
+print("Starting image insertion...")
+img_folder = "IMG"  # Assumes IMG folder is in the same directory as the script
+images_added_count = 0
+
+if not os.path.isdir(img_folder):
+    print(f"Error: Image folder '{img_folder}' not found. Skipping image insertion.")
+else:
+    # Get list of cities already inserted
+    cursor.execute("SELECT name FROM City")
+    db_cities = {row[0] for row in cursor.fetchall()}
+
+    city_folders = [d for d in os.listdir(img_folder) if os.path.isdir(os.path.join(img_folder, d))]
+    
+    for city_name in city_folders:
+        if city_name not in db_cities:
+            print(f"Warning: Folder found for city '{city_name}' but city does not exist in DB. Skipping.")
+            continue
+
+        city_path = os.path.join(img_folder, city_name)
+        try:
+            image_files = sorted([f for f in os.listdir(city_path) if os.path.isfile(os.path.join(city_path, f)) and f.lower().endswith(('.png', '.jpg', '.jpeg', '.webp'))])
+            
+            if len(image_files) < 3:
+                print(f"Warning: Found only {len(image_files)} images for city '{city_name}'. Expected 3. Skipping this city.")
+                continue
+                
+            # Take only the first 3 images if more exist
+            images_to_insert = image_files[:3]
+            
+            for i, filename in enumerate(images_to_insert):
+                image_path = os.path.join(city_path, filename)
+                order = i + 1
+                
+                # Read image data
+                with open(image_path, 'rb') as f:
+                    image_data = f.read()
+                
+                # Get content type
+                content_type, _ = mimetypes.guess_type(image_path)
+                if not content_type:
+                    content_type = 'application/octet-stream' # Default if type cannot be guessed
+                    print(f"Warning: Could not guess content type for {filename}. Using default.")
+                
+                # Insert into DB
+                try:
+                    cursor.execute("""
+                    INSERT INTO Image (city_name, image_data, content_type, "order")
+                    VALUES (?, ?, ?, ?)
+                    """, (city_name, image_data, content_type, order))
+                    images_added_count += 1
+                except sqlite3.IntegrityError:
+                     print(f"Warning: Image for city '{city_name}' order {order} likely already exists. Skipping.")
+                except sqlite3.Error as db_err:
+                    print(f"Error inserting image {filename} for city {city_name}: {db_err}")
+        
+        except Exception as e:
+            print(f"Error processing folder {city_path}: {e}")
+            traceback.print_exc()
+
+print(f"Finished image insertion. Added {images_added_count} images.")
+# ------------------------- END IMAGE INSERTION -------------------------
 
 # Commit changes and close connection
 conn.commit()

@@ -23,6 +23,7 @@ export interface CityCategory {
 export interface City {
   name: string;
   categories: CityCategory[];
+  image_ids: number[];
 }
 
 export interface Vote {

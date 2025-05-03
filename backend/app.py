@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Depends, status, Body, Query
+from fastapi import FastAPI, HTTPException, Depends, status, Body, Query, Response
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, EmailStr, Field
@@ -11,6 +11,10 @@ import numpy as np
 from scipy.spatial.distance import cosine
 from datetime import datetime, timedelta
 import random
+from sqlalchemy.orm import Session
+import schemas # Assuming you have schemas.py
+import crud # Assuming you have crud.py
+from database import SessionLocal, engine # Assuming database setup
 
 # Initialize FastAPI app
 app = FastAPI(title="The Perfect Reunion API")
@@ -72,6 +76,7 @@ class CityCategory(BaseModel):
 class City(BaseModel):
     name: str
     categories: List[CityCategory] = []
+    image_ids: List[int] = []
 
 class GroupCreate(BaseModel):
     code: Optional[int] = None
@@ -482,7 +487,7 @@ async def get_city(city_name: str, conn = Depends(get_db)):
     
     return {"name": city_name, "categories": categories}
 
-@app.get("/recommendations", response_model=List[City])
+@app.get("/recommendations", response_model=List[City], tags=["Recommendations"])
 async def get_recommendations(
     current_user = Depends(get_current_user),
     conn = Depends(get_db),
@@ -707,6 +712,25 @@ async def get_flight_companies(conn = Depends(get_db)):
     cursor = conn.cursor()
     cursor.execute("SELECT name FROM FlightCompany")
     return [row["name"] for row in cursor.fetchall()]
+
+@app.get("/images/{image_id}",
+         response_class=Response,
+         responses={
+             200: {
+                 "content": {"image/jpeg": {}, "image/png": {}, "image/webp": {}, "application/octet-stream": {}},
+                 "description": "The image data."
+             },
+             404: {"description": "Image not found"}
+         },
+         tags=["Images"] # Optional: Tag for API docs
+        )
+def read_image(image_id: int, db: Session = Depends(get_db)):
+    db_image = crud.get_image(db, image_id=image_id) # Assumes crud.get_image exists
+    if db_image is None:
+        raise HTTPException(status_code=404, detail="Image not found")
+    
+    # Return the binary data with the correct content type
+    return Response(content=db_image.image_data, media_type=db_image.content_type)
 
 # Start the server with: uvicorn app:app --reload
 if __name__ == "__main__":
