@@ -81,6 +81,9 @@ const GroupDetail: React.FC = () => {
     max_budget: undefined,
     companies: []
   });
+ 
+  const [priceSortOrder, setPriceSortOrder] = useState<'asc' | 'desc' | undefined>(undefined);
+  const [distanceSortOrder, setDistanceSortOrder] = useState<'asc' | 'desc' | undefined>(undefined);
 
   useEffect(() => {
     // Redirect if not authenticated
@@ -185,17 +188,36 @@ const GroupDetail: React.FC = () => {
       setFlightError(null);
       const results = await searchFlights(flightSearch);
       setFlights(results);
-      
+
+      const displayedFlights = Math.min(results.length, 10); // Cap the number of flights at 10
       if (results.length > 0) {
-        toast({ title: 'Flights Found', description: `Found ${results.length} flight options.`, status: 'success', duration: 3000, isClosable: true });
+        toast({
+          title: 'Flights Found',
+          description: `Displaying ${displayedFlights} of ${results.length} flight options.`,
+          status: 'success',
+          duration: 3000,
+          isClosable: true,
+        });
         setTabIndex(1); // Switch to flights tab only if results found
       } else {
-        toast({ title: 'No Flights Found', description: 'Try adjusting your search criteria.', status: 'info', duration: 3000, isClosable: true });
+        toast({
+          title: 'No Flights Found',
+          description: 'Try adjusting your search criteria.',
+          status: 'info',
+          duration: 3000,
+          isClosable: true,
+        });
       }
     } catch (err: any) {
       const errorMessage = 'Failed to search for flights. Please try again.';
       setFlightError(errorMessage);
-      toast({ title: 'Flight Search Error', description: errorMessage, status: 'error', duration: 5000, isClosable: true });
+      toast({
+        title: 'Flight Search Error',
+        description: errorMessage,
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
       console.error(err);
     } finally {
       setFlightsLoading(false);
@@ -513,11 +535,21 @@ const GroupDetail: React.FC = () => {
                 Search Flights
               </Button>
 
-              {/* Flight Results */}             
-              <Heading as="h4" size="md" mb={4}>
-                Flight Results
-              </Heading>
-              
+              {/* Flight Results */}
+              <HStack justifyContent="space-between" mb={4}>
+                <Heading as="h4" size="md">
+                  Flight Results
+                </Heading>
+                <HStack spacing={4}>
+                  <Button
+                    variant="outline"
+                    onClick={() => setPriceSortOrder(priceSortOrder === 'asc' ? 'desc' : 'asc')}
+                  >
+                    Sort by Price ({priceSortOrder === 'asc' ? 'Descending' : 'Ascending'})
+                  </Button>
+                </HStack>
+              </HStack>
+
               {flightsLoading ? (
                 <Center p={8}>
                   <Spinner size="xl" />
@@ -529,50 +561,56 @@ const GroupDetail: React.FC = () => {
                 </Alert>
               ) : (
                 <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6}>
-                  {flights.slice(0,10).map((flight) => (
-                    <Box key={flight.code} borderWidth="1px" borderRadius="lg" p={4} boxShadow="sm">
-                      <Flex justifyContent="space-between" mb={2}>
-                        <Heading size="sm">{flight.depCity} → {flight.arrCity}</Heading>
-                        <Text fontWeight="bold" color="primary.600">
-                          ${flight.cost.toFixed(2)}
-                        </Text>
-                      </Flex>
-                      
-                      <Flex justifyContent="space-between" mb={2} fontSize="sm">
-                        <Text>{formatFlightTime(flight.depTime)}</Text>
-                        <Text color="gray.500">{formatDuration(flight.timeDuration)}</Text>
-                      </Flex>
-                      
-                      <Divider my={3} />
-                      
-                      <SimpleGrid columns={2} spacing={2} fontSize="sm">
-                        <Box>
-                          <Text color="gray.500">Airline</Text>
-                          <Text>{flight.company}</Text>
-                        </Box>
-                        <Box>
-                          <Text color="gray.500">Aircraft</Text>
-                          <Text>{flight.planeModel}</Text>
-                        </Box>
-                        <Box>
-                          <Text color="gray.500">Flight #</Text>
-                          <Text>{flight.code}</Text>
-                        </Box>
-                        <Box>
-                          <Text color="gray.500">Distance</Text>
-                          <Text>{flight.distance.toFixed(0)} km</Text>
-                        </Box>
-                      </SimpleGrid>
-                      <Flex mt={4} justifyContent="flex-end" gap={2}>
-                        <Button size="sm" variant="ghost" colorScheme="blue">
-                           Vote This Flight
-                         </Button>
-                         <Button size="sm" variant="ghost">
-                           Share
-                         </Button>
-                      </Flex>
-                    </Box>
-                  ))}
+                  {flights
+                    .sort((a, b) => {
+                      if (priceSortOrder) {
+                        return priceSortOrder === 'asc' ? a.cost - b.cost : b.cost - a.cost;
+                      }
+                      // Default: sort by distance
+                      return a.distance - b.distance;
+                    })
+                    .slice(0, 10) // Limit to 10 flights
+                    .map((flight) => (
+                      <Box key={flight.code} borderWidth="1px" borderRadius="lg" p={4} boxShadow="sm">
+                        <Flex justifyContent="space-between" mb={2}>
+                          <Heading size="sm">{flight.depCity} → {flight.arrCity}</Heading>
+                          <Text fontWeight="bold" color="primary.600">
+                            ${flight.cost.toFixed(2)}
+                          </Text>
+                        </Flex>
+                        <Flex justifyContent="space-between" mb={2} fontSize="sm">
+                          <Text>{formatFlightTime(flight.depTime)}</Text>
+                          <Text color="gray.500">{formatDuration(flight.timeDuration)}</Text>
+                        </Flex>
+                        <Divider my={3} />
+                        <SimpleGrid columns={2} spacing={2} fontSize="sm">
+                          <Box>
+                            <Text color="gray.500">Airline</Text>
+                            <Text>{flight.company}</Text>
+                          </Box>
+                          <Box>
+                            <Text color="gray.500">Aircraft</Text>
+                            <Text>{flight.planeModel}</Text>
+                          </Box>
+                          <Box>
+                            <Text color="gray.500">Flight #</Text>
+                            <Text>{flight.code}</Text>
+                          </Box>
+                          <Box>
+                            <Text color="gray.500">Distance</Text>
+                            <Text>{flight.distance.toFixed(0)} km</Text>
+                          </Box>
+                        </SimpleGrid>
+                        <Flex mt={4} justifyContent="flex-end" gap={2}>
+                          <Button size="sm" variant="ghost" colorScheme="blue">
+                            Vote This Flight
+                          </Button>
+                          <Button size="sm" variant="ghost">
+                            Share
+                          </Button>
+                        </Flex>
+                      </Box>
+                    ))}
                 </SimpleGrid>
               )}
               
@@ -613,4 +651,4 @@ const GroupDetail: React.FC = () => {
   );
 };
 
-export default GroupDetail; 
+export default GroupDetail;
