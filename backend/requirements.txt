@@ -1,0 +1,12 @@
+# Backend Dependencies
+
+fastapi
+uvicorn[standard]
+sqlalchemy
+passlib[bcrypt]
+python-jose[cryptography]
+python-multipart
+pydantic
+faker # For data generation
+numpy # For recommendation algorithm calculations
+scikit-learn # For cosine similarity calculation 
