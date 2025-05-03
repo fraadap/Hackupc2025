@@ -44,16 +44,26 @@ CREATE TABLE IF NOT EXISTS VoteUC (
 """)
 
 cursor.execute("""
+CREATE TABLE IF NOT EXISTS FlightCompany (
+    name TEXT PRIMARY KEY NOT NULL
+)
+""")
+
+cursor.execute("""
 CREATE TABLE IF NOT EXISTS Flight (
     code INTEGER PRIMARY KEY NOT NULL,
     cost FLOAT NOT NULL,
     depCity TEXT NOT NULL,
     arrCity TEXT NOT NULL,
     depTime TEXT NOT NULL,
-    arrTime TEXT NOT NULL,
+    timeDuration INTEGER NOT NULL,
+    distance FLOAT NOT NULL,
+    planeModel TEXT NOT NULL,
+    company TEXT NOT NULL,
 
     FOREIGN KEY (depCity) REFERENCES City(name),
-    FOREIGN KEY (arrCity) REFERENCES City(name)
+    FOREIGN KEY (arrCity) REFERENCES City(name),
+    FOREIGN KEY (company) REFERENCES FlightCompany(name)
 )
 """)
 
