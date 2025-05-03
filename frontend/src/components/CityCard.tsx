@@ -9,7 +9,9 @@ import {
   VStack,
   Button,
   Tooltip,
+  Icon,
 } from '@chakra-ui/react';
+import { CloseIcon } from '@chakra-ui/icons';
 import { City } from '../types';
 
 interface CityCardProps {
@@ -25,10 +27,7 @@ const CityCard: React.FC<CityCardProps> = ({
   onLike, 
   onDislike 
 }) => {
-  // Placeholder image - replace with actual city image logic if available
   const placeholderImage = `https://via.placeholder.com/400x250/CBD5E0/718096?text=${encodeURIComponent(city.name)}`;
-  
-  // Get top 3 categories to display (assuming they are sorted by relevance/importance)
   const topCategories = city.categories.slice(0, 3);
 
   return (
@@ -45,7 +44,7 @@ const CityCard: React.FC<CityCardProps> = ({
       <Image src={placeholderImage} alt={city.name} objectFit="cover" h="200px" />
 
       <VStack p={4} spacing={3} align="stretch" flexGrow={1}>
-        <Heading as="h3" size="md" >{city.name}</Heading>
+        <Heading as="h3" size="md">{city.name}</Heading>
         
         <Box flexGrow={1}>
           <Text fontSize="sm" color="gray.600" mb={2}>
@@ -54,7 +53,7 @@ const CityCard: React.FC<CityCardProps> = ({
           <VStack spacing={2} align="stretch">
             {topCategories.length > 0 ? (
               topCategories.map((cat) => (
-                <Box key={cat.category} >
+                <Box key={cat.category}>
                   <Tag size="sm" colorScheme="blue" mr={2} mb={1}>{cat.category}</Tag>
                   <Text fontSize="xs" display="inline">{cat.descr}</Text>
                 </Box>
@@ -69,22 +68,32 @@ const CityCard: React.FC<CityCardProps> = ({
           <HStack justify="space-around" pt={3} borderTopWidth="1px" borderColor="gray.200">
             <Tooltip label="Dislike" placement="bottom">
               <Button
-                colorScheme="red"
+                onClick={onDislike}
                 variant="ghost"
                 borderRadius="full"
-                onClick={onDislike}
+                color="red"
+                _hover={{ bg: 'gray.100' }}
+                p={2}
               >
-                Dislike
+                <Icon as={CloseIcon} boxSize={4} />
               </Button>
             </Tooltip>
             <Tooltip label="Like" placement="bottom">
               <Button
-                colorScheme="green"
+                onClick={onLike}
                 variant="ghost"
                 borderRadius="full"
-                onClick={onLike}
+                _hover={{ bg: 'gray.100' }}
+                p={2}
               >
-                Like
+                <Icon viewBox="0 0 24 24" boxSize={6}>
+                  <path
+                    d="M12 21s-1-.6-2.3-1.8C7.1 17.2 4 14.2 4 10.5 4 7.4 6.4 5 9.5 5c1.5 0 3 .7 3.9 1.9C14.5 5.7 16 5 17.5 5 20.6 5 23 7.4 23 10.5c0 3.7-3.1 6.7-5.7 8.7C13 20.4 12 21 12 21z"
+                    fill="blue"
+                    stroke="blue"
+                    strokeWidth="2"
+                  />
+                </Icon>
               </Button>
             </Tooltip>
           </HStack>
@@ -94,4 +103,4 @@ const CityCard: React.FC<CityCardProps> = ({
   );
 };
 
-export default CityCard; 
+export default CityCard;
