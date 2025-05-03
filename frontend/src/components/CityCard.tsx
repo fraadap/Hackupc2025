@@ -35,7 +35,7 @@ const CityCard: React.FC<CityCardProps> = ({
   const sortedCategories = [...city.categories].sort((a: CityCategory, b: CityCategory) => b.value - a.value);
   const topCategories = sortedCategories.slice(0, 3);
 
-  const isClickable = !!onClick && !showActions;
+  const isClickable = !!onClick;
 
   return (
     <Box 
@@ -48,13 +48,17 @@ const CityCard: React.FC<CityCardProps> = ({
       height="100%"
       display="flex"
       flexDirection="column"
+      p={0}
       _hover={isClickable ? { 
         boxShadow: "lg", 
         cursor: "pointer" 
       } : {}}
-      _focus={isClickable ? { boxShadow: "outline" } : {}}
+      _focus={isClickable ? { 
+        outline: "2px solid",
+        outlineColor: "primary.500",
+        outlineOffset: "2px"
+      } : {}}
       w="100%"
-      p={0}
     >
       <Image src={placeholderImage} alt={city.name} objectFit="cover" h="200px" borderTopRadius="lg" />
 
@@ -125,4 +129,4 @@ const CityCard: React.FC<CityCardProps> = ({
   );
 };
 
-export default CityCard;
+export default CityCard; 

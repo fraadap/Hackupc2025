@@ -18,19 +18,29 @@ const SwipeableCity = forwardRef<HTMLDivElement, SwipeableCityProps>((
 ) => {
   const [direction, setDirection] = useState<'left' | 'right' | null>(null);
 
-  const [{ x, rotate, scale }, api] = useSpring(() => ({
+  // Define flyOffDistance in the component scope
+  const flyOffDistance = typeof window !== 'undefined' ? window.innerWidth * 1.2 : 600; // Default if window is undefined
+
+  const [{ x, y, rotate, scale }, api] = useSpring(() => ({
     x: 0,
+    y: 0,
     rotate: 0,
     scale: 1,
-    config: { tension: 300, friction: 20 }
+    config: { tension: 400, friction: 30 }
   }));
 
   const handlers = useSwipeable({
     onSwiping: (e) => {
+      const rot = e.deltaX / 15;
+      const sc = 1 - Math.abs(e.deltaX) / 1000;
+      const yLift = -Math.abs(e.deltaX) / 20;
+      
       api.start({
         x: e.deltaX,
-        rotate: e.deltaX / 20,
-        scale: 1,
+        y: yLift,
+        rotate: rot,
+        scale: sc,
+        immediate: true
       });
       
       if (e.deltaX > 50) setDirection('right');
@@ -38,48 +48,57 @@ const SwipeableCity = forwardRef<HTMLDivElement, SwipeableCityProps>((
       else setDirection(null);
     },
     onSwiped: (e) => {
+      setDirection(null);
       const threshold = 120;
+
+      const flyOffAnimation = (liked: boolean) => ({
+        x: liked ? flyOffDistance : -flyOffDistance,
+        y: -100,
+        rotate: liked ? 45 : -45,
+        scale: 0.8,
+        config: { tension: 200, friction: 30 },
+        onRest: () => onSwipe(liked),
+      });
       
       if (e.deltaX > threshold) {
-        api.start({
-          x: 500,
-          rotate: 30,
-          onRest: () => onSwipe(true),
-        });
+        api.start(flyOffAnimation(true));
       } else if (e.deltaX < -threshold) {
-        api.start({
-          x: -500,
-          rotate: -30,
-          onRest: () => onSwipe(false),
-        });
+        api.start(flyOffAnimation(false));
       } else {
         api.start({
           x: 0,
+          y: 0,
           rotate: 0,
           scale: 1,
+          config: { tension: 400, friction: 30 }
         });
-        setDirection(null);
       }
     },
     trackMouse: true,
   });
 
   const handleLike = () => {
-    api.start({
-      x: 500,
-      rotate: 30,
-      onRest: () => onSwipe(true),
-    });
     setDirection('right');
+    api.start({
+      x: flyOffDistance,
+      y: -100,
+      rotate: 45,
+      scale: 0.8,
+      config: { tension: 200, friction: 30 },
+      onRest: () => onSwipe(true)
+    });
   };
 
   const handleDislike = () => {
-    api.start({
-      x: -500,
-      rotate: -30,
-      onRest: () => onSwipe(false),
-    });
     setDirection('left');
+    api.start({
+      x: -flyOffDistance,
+      y: -100,
+      rotate: -45,
+      scale: 0.8,
+      config: { tension: 200, friction: 30 },
+      onRest: () => onSwipe(false)
+    });
   };
 
   const AnimatedBox = animated(Box);
@@ -95,10 +114,13 @@ const SwipeableCity = forwardRef<HTMLDivElement, SwipeableCityProps>((
           {...handlers}
           style={{
             x,
+            y,
             rotate,
             scale,
             touchAction: 'none',
+            cursor: 'grab'
           }}
+          _active={{ cursor: 'grabbing' }}
           _before={{
             content: '""',
             position: 'absolute',
@@ -111,6 +133,7 @@ const SwipeableCity = forwardRef<HTMLDivElement, SwipeableCityProps>((
             borderStyle: 'solid',
             borderColor: direction === 'right' ? 'green.300' : direction === 'left' ? 'red.300' : 'transparent',
             opacity: direction ? 0.5 : 0,
+            transition: 'border-color 0.2s ease-in-out, opacity 0.2s ease-in-out',
             zIndex: 10,
             pointerEvents: 'none',
           }}

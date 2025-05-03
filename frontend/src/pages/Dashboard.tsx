@@ -35,6 +35,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import CityCard from '../components/CityCard';
+import SwipeableCity from '../components/SwipeableCity';
 import { City, CityCategory } from '../types';
 import { getRecommendations, getCitiesForEvaluation, voteCity } from '../services/api';
 
@@ -53,7 +54,6 @@ const Dashboard: React.FC = () => {
   const { isOpen: isModalOpen, onOpen: onModalOpen, onClose: onModalClose } = useDisclosure();
 
   useEffect(() => {
-    // Redirect if not authenticated
     if (!isAuthenticated) {
       navigate('/login');
       return;
@@ -62,7 +62,7 @@ const Dashboard: React.FC = () => {
     const fetchRecommendations = async () => {
       try {
         setLoading(true);
-        const data = await getRecommendations(10);
+        const data = await getRecommendations(15);
         setRecommendedCities(data);
       } catch (err: any) {
         setError('Failed to load recommendations. Please try again.');
@@ -75,61 +75,54 @@ const Dashboard: React.FC = () => {
     fetchRecommendations();
   }, [isAuthenticated, navigate]);
 
+  useEffect(() => {
+    if (tabIndex === 1 && !newCityToEvaluate && !evaluationLoading) {
+      handleLoadNextCity();
+    }
+  }, [tabIndex]);
+
   const handleTabsChange = (index: number) => {
     setTabIndex(index);
   };
 
-  const handleEvaluateMore = async () => {
+  const handleLoadNextCity = async () => {
     try {
       setEvaluationLoading(true);
-      const cities = await getCitiesForEvaluation(1);
-      if (cities.length > 0) {
-        setNewCityToEvaluate(cities[0]);
-        setTabIndex(1); // Switch to the evaluate tab
-      } else {
-        setError("No more cities to evaluate right now."); // Inform user if no cities
-      }
-    } catch (err: any) {
-      setError('Failed to load a new city for evaluation. Please try again.');
-      console.error(err);
-    } finally {
-      setEvaluationLoading(false);
-    }
-  };
-
-  const handleVote = async (liked: boolean) => {
-    if (!newCityToEvaluate) return;
-
-    try {
-      setEvaluationLoading(true);
-      setError(null); // Clear previous errors
-      
-      // Submit vote
-      await voteCity({
-        city: newCityToEvaluate.name,
-        value: liked ? 1 : 0
-      });
-      
-      // Refresh recommendations after voting
-      const newRecommendations = await getRecommendations(10);
-      setRecommendedCities(newRecommendations);
-      
-      // Load a new city to evaluate immediately
+      setError(null);
       const cities = await getCitiesForEvaluation(1);
       if (cities.length > 0) {
         setNewCityToEvaluate(cities[0]);
       } else {
         setNewCityToEvaluate(null);
-        setTabIndex(0); // Go back to recommendations if no more cities
-        setError("You've evaluated all available cities!"); // Inform user
+        setError("You've evaluated all available cities!"); 
+        setTabIndex(0);
       }
     } catch (err: any) {
-      setError('Failed to register your vote or fetch new data. Please try again.');
+      setError('Failed to load a new city for evaluation. Please try again.');
       console.error(err);
-      setNewCityToEvaluate(null); // Clear city on error
-      setTabIndex(0); // Go back to recommendations on error
+      setNewCityToEvaluate(null); 
+      setTabIndex(0); 
     } finally {
       setEvaluationLoading(false);
+    }
+  };
+
+  const handleCityEvaluation = async (liked: boolean) => {
+    if (!newCityToEvaluate) return;
+    const cityNameToVote = newCityToEvaluate.name;
+    handleLoadNextCity(); 
+    
+    try {
+      await voteCity({
+        city: cityNameToVote,
+        value: liked ? 1 : 0
+      });
+      
+      const newRecommendations = await getRecommendations(15);
+      setRecommendedCities(newRecommendations);
+
+    } catch (err: any) {
+      console.error('Failed background vote/recommendation update:', err);
     }
   };
 
@@ -236,7 +229,7 @@ const Dashboard: React.FC = () => {
                   </Text>
                   <Button
                     colorScheme="primary"
-                    onClick={handleEvaluateMore}
+                    onClick={handleLoadNextCity}
                     isLoading={evaluationLoading}
                     spinner={<Spinner size="sm" />}
                   >
@@ -259,7 +252,7 @@ const Dashboard: React.FC = () => {
                     <Button
                       variant="outline"
                       colorScheme="primary"
-                      onClick={handleEvaluateMore}
+                      onClick={handleLoadNextCity}
                       isLoading={evaluationLoading}
                       spinner={<Spinner size="sm" />}
                     >
@@ -271,16 +264,16 @@ const Dashboard: React.FC = () => {
             </TabPanel>
 
             <TabPanel>
-              <Center p={4}>
-                {evaluationLoading ? (
+              <Center p={4} minH="450px">
+                {evaluationLoading && !newCityToEvaluate ? (
                   <Spinner size="xl" />
                 ) : newCityToEvaluate ? (
-                  <Box maxW="sm" w="100%">
-                    <CityCard 
+                  <Box maxW="sm" w="100%" h="400px">
+                    <SwipeableCity 
+                      key={newCityToEvaluate.name}
                       city={newCityToEvaluate} 
-                      showActions 
-                      onLike={() => handleVote(true)} 
-                      onDislike={() => handleVote(false)} 
+                      onSwipe={handleCityEvaluation}
+                      loading={false}
                       onClick={() => handleCardClick(newCityToEvaluate)}
                     />
                     <Text color="gray.500" textAlign="center" mt={4} fontSize="sm">
@@ -289,16 +282,16 @@ const Dashboard: React.FC = () => {
                   </Box>
                 ) : (
                   <Center flexDirection="column" p={8}>
-                    <Text mb={4}>
-                      Ready to evaluate more cities? Click the button below to start.
-                    </Text>
+                    <Text mb={4} textAlign="center">
+                      {error || "Ready to evaluate more cities? Click the button below to start."}
+                  </Text>
                     <Button
                       colorScheme="primary"
-                      onClick={handleEvaluateMore}
+                      onClick={handleLoadNextCity}
                       isLoading={evaluationLoading}
                       spinner={<Spinner size="sm" />}
                     >
-                      Load a City to Evaluate
+                      {error ? "Try Again" : "Load a City to Evaluate"}
                     </Button>
                   </Center>
                 )}
