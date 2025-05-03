@@ -78,6 +78,7 @@ CREATE TABLE IF NOT EXISTS CityCateg (
     city TEXT NOT NULL,
     category TEXT NOT NULL,
     descr TEXT NOT NULL,
+    importance INTEGER NOT NULL CHECK (importance IN (0, 10)),
                
     PRIMARY KEY(city, category),
     FOREIGN KEY (city) REFERENCES City(name),
