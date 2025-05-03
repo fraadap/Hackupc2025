@@ -188,17 +188,36 @@ const GroupDetail: React.FC = () => {
       setFlightError(null);
       const results = await searchFlights(flightSearch);
       setFlights(results);
-      
+
+      const displayedFlights = Math.min(results.length, 10); // Cap the number of flights at 10
       if (results.length > 0) {
-        toast({ title: 'Flights Found', description: `Found ${results.length} flight options.`, status: 'success', duration: 3000, isClosable: true });
+        toast({
+          title: 'Flights Found',
+          description: `Displaying ${displayedFlights} of ${results.length} flight options.`,
+          status: 'success',
+          duration: 3000,
+          isClosable: true,
+        });
         setTabIndex(1); // Switch to flights tab only if results found
       } else {
-        toast({ title: 'No Flights Found', description: 'Try adjusting your search criteria.', status: 'info', duration: 3000, isClosable: true });
+        toast({
+          title: 'No Flights Found',
+          description: 'Try adjusting your search criteria.',
+          status: 'info',
+          duration: 3000,
+          isClosable: true,
+        });
       }
     } catch (err: any) {
       const errorMessage = 'Failed to search for flights. Please try again.';
       setFlightError(errorMessage);
-      toast({ title: 'Flight Search Error', description: errorMessage, status: 'error', duration: 5000, isClosable: true });
+      toast({
+        title: 'Flight Search Error',
+        description: errorMessage,
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
       console.error(err);
     } finally {
       setFlightsLoading(false);
