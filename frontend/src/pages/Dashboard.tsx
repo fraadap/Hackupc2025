@@ -18,11 +18,24 @@ import {
   Center,
   Flex,
   VStack,
+  useDisclosure,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalCloseButton,
+  ModalBody,
+  ModalFooter,
+  List,
+  ListItem,
+  ListIcon,
+  Badge,
+  HStack,
 } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import CityCard from '../components/CityCard';
-import { City } from '../types';
+import { City, CityCategory } from '../types';
 import { getRecommendations, getCitiesForEvaluation, voteCity } from '../services/api';
 
 const Dashboard: React.FC = () => {
@@ -35,6 +48,9 @@ const Dashboard: React.FC = () => {
   const [evaluationLoading, setEvaluationLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [tabIndex, setTabIndex] = useState(0);
+  const [selectedCity, setSelectedCity] = useState<City | null>(null);
+
+  const { isOpen: isModalOpen, onOpen: onModalOpen, onClose: onModalClose } = useDisclosure();
 
   useEffect(() => {
     // Redirect if not authenticated
@@ -121,6 +137,51 @@ const Dashboard: React.FC = () => {
     navigate('/groups');
   };
 
+  const handleCardClick = (city: City) => {
+    const sortedCity = {
+      ...city,
+      categories: [...(city.categories || [])].sort((a, b) => b.value - a.value),
+    };
+    setSelectedCity(sortedCity);
+    onModalOpen();
+  };
+
+  const renderSortedCategories = (categories: CityCategory[]) => {
+    if (!categories || categories.length === 0) {
+      return <Text>No category details available.</Text>;
+    }
+    return (
+      <VStack spacing={4} align="stretch">
+        {categories.map((cat) => (
+          <Box 
+            key={cat.category} 
+            p={3} 
+            borderWidth="1px" 
+            borderRadius="md" 
+            borderColor="gray.200"
+            bg="gray.50"
+          >
+            <HStack justify="space-between" mb={1}>
+              <Text as="span" fontWeight="bold" fontSize="lg">
+                {cat.category}
+              </Text>
+              <Badge 
+                colorScheme={cat.value > 7 ? 'green' : cat.value < 4 ? 'red' : 'yellow'} 
+                px={3}
+                py={1}
+                borderRadius="full"
+                fontSize="sm"
+              >
+                {cat.value}/10
+              </Badge>
+            </HStack>
+            <Text fontSize="md" color="gray.700">{cat.descr}</Text> 
+          </Box>
+        ))}
+      </VStack>
+    );
+  };
+
   return (
     <Container maxW="container.lg" py={8}>
       <Flex 
@@ -186,7 +247,11 @@ const Dashboard: React.FC = () => {
                 <VStack spacing={6} align="stretch">
                   <SimpleGrid columns={{ base: 1, sm: 2, md: 3 }} spacing={6}>
                     {recommendedCities.map((city) => (
-                      <CityCard key={city.name} city={city} />
+                      <CityCard 
+                        key={city.name} 
+                        city={city} 
+                        onClick={() => handleCardClick(city)}
+                      />
                     ))}
                   </SimpleGrid>
 
@@ -216,6 +281,7 @@ const Dashboard: React.FC = () => {
                       showActions 
                       onLike={() => handleVote(true)} 
                       onDislike={() => handleVote(false)} 
+                      onClick={() => handleCardClick(newCityToEvaluate)}
                     />
                     <Text color="gray.500" textAlign="center" mt={4} fontSize="sm">
                       Swipe right to like, left to dislike, or use the buttons.
@@ -241,6 +307,24 @@ const Dashboard: React.FC = () => {
           </TabPanels>
         </Tabs>
       </Box>
+
+      {selectedCity && (
+        <Modal isOpen={isModalOpen} onClose={onModalClose} size="xl" scrollBehavior="inside" isCentered>
+          <ModalOverlay bg="blackAlpha.600"/>
+          <ModalContent mx={4}>
+            <ModalHeader borderBottomWidth="1px" pb={3}>{selectedCity.name} - Details</ModalHeader>
+            <ModalCloseButton />
+            <ModalBody py={5}>
+              {renderSortedCategories(selectedCity.categories)}
+            </ModalBody>
+            <ModalFooter borderTopWidth="1px" pt={3}>
+              <Button colorScheme="primary" onClick={onModalClose}>
+                Close
+              </Button>
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
+      )}
     </Container>
   );
 };

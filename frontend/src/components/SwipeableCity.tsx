@@ -9,10 +9,11 @@ interface SwipeableCityProps {
   city: City;
   onSwipe: (liked: boolean) => void;
   loading?: boolean;
+  onClick?: () => void;
 }
 
 const SwipeableCity = forwardRef<HTMLDivElement, SwipeableCityProps>((
-  { city, onSwipe, loading = false }, 
+  { city, onSwipe, loading = false, onClick }, 
   ref
 ) => {
   const [direction, setDirection] = useState<'left' | 'right' | null>(null);
@@ -114,7 +115,13 @@ const SwipeableCity = forwardRef<HTMLDivElement, SwipeableCityProps>((
             pointerEvents: 'none',
           }}
         >
-          <CityCard city={city} showActions onLike={handleLike} onDislike={handleDislike} />
+          <CityCard 
+            city={city} 
+            showActions 
+            onLike={handleLike} 
+            onDislike={handleDislike} 
+            onClick={onClick}
+          />
         </AnimatedBox>
       )}
     </Box>

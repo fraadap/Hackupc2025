@@ -31,11 +31,20 @@ import {
   Wrap, // Use Wrap for tag rendering
   WrapItem,
   useToast,
+  useDisclosure,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalCloseButton,
+  ModalBody,
+  ModalFooter,
+  Badge,
 } from '@chakra-ui/react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import CityCard from '../components/CityCard';
-import { City, Flight, Group, FlightSearch } from '../types';
+import { City, Flight, Group, FlightSearch, CityCategory } from '../types';
 import {
   getGroupRecommendations,
   getUserGroups,
@@ -61,6 +70,9 @@ const GroupDetail: React.FC = () => {
   const [flightsLoading, setFlightsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [flightError, setFlightError] = useState<string | null>(null);
+
+  const [selectedCity, setSelectedCity] = useState<City | null>(null);
+  const { isOpen: isModalOpen, onOpen: onModalOpen, onClose: onModalClose } = useDisclosure();
 
   const [flightSearch, setFlightSearch] = useState<FlightSearch>({
     departure_city: '',
@@ -213,6 +225,51 @@ const GroupDetail: React.FC = () => {
     return `${hours}h ${mins}m`;
   };
 
+  const handleCardClick = (city: City) => {
+    const sortedCity = {
+      ...city,
+      categories: [...(city.categories || [])].sort((a, b) => b.value - a.value),
+    };
+    setSelectedCity(sortedCity);
+    onModalOpen();
+  };
+
+  const renderSortedCategories = (categories: CityCategory[]) => {
+    if (!categories || categories.length === 0) {
+      return <Text>No category details available.</Text>;
+    }
+    return (
+      <VStack spacing={4} align="stretch">
+        {categories.map((cat) => (
+          <Box 
+            key={cat.category} 
+            p={3} 
+            borderWidth="1px" 
+            borderRadius="md" 
+            borderColor="gray.200"
+            bg="gray.50"
+          >
+            <HStack justify="space-between" mb={1}>
+              <Text as="span" fontWeight="bold" fontSize="lg">
+                {cat.category}
+              </Text>
+              <Badge 
+                colorScheme={cat.value > 7 ? 'green' : cat.value < 4 ? 'red' : 'yellow'} 
+                px={3}
+                py={1}
+                borderRadius="full"
+                fontSize="sm"
+              >
+                {cat.value}/10
+              </Badge>
+            </HStack>
+            <Text fontSize="md" color="gray.700">{cat.descr}</Text> 
+          </Box>
+        ))}
+      </VStack>
+    );
+  };
+
   // Handle potential loading state more gracefully
   if (loading) {
     return (
@@ -323,7 +380,11 @@ const GroupDetail: React.FC = () => {
                 ) : (
                   <SimpleGrid columns={{ base: 1, sm: 2, md: 3 }} spacing={6}>
                     {recommendedCities.map((city) => (
-                      <CityCard key={city.name} city={city} />
+                      <CityCard 
+                        key={city.name} 
+                        city={city} 
+                        onClick={() => handleCardClick(city)} 
+                      />
                     ))}
                   </SimpleGrid>
                 )}
@@ -527,6 +588,27 @@ const GroupDetail: React.FC = () => {
           </TabPanels>
         </Tabs>
       </Box>
+
+      {/* --- City Detail Modal --- */}
+      {selectedCity && (
+        <Modal isOpen={isModalOpen} onClose={onModalClose} size="xl" scrollBehavior="inside" isCentered>
+          <ModalOverlay bg="blackAlpha.600"/>
+          <ModalContent mx={4}>
+            <ModalHeader borderBottomWidth="1px" pb={3}>{selectedCity.name} - Details</ModalHeader>
+            <ModalCloseButton />
+            <ModalBody py={5}>
+              {renderSortedCategories(selectedCity.categories)}
+            </ModalBody>
+            <ModalFooter borderTopWidth="1px" pt={3}>
+              <Button colorScheme="primary" onClick={onModalClose}>
+                Close
+              </Button>
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
+      )}
+      {/* --- End Modal --- */}
+
     </Container>
   );
 };

@@ -4,34 +4,42 @@ import {
   Image,
   Heading,
   Text,
-  Tag,
   HStack,
   VStack,
   Button,
   Tooltip,
+  Badge,
+  useStyleConfig,
   Icon,
 } from '@chakra-ui/react';
 import { CloseIcon } from '@chakra-ui/icons';
-import { City } from '../types';
+import { City, CityCategory } from '../types';
 
 interface CityCardProps {
   city: City;
   showActions?: boolean;
   onLike?: () => void;
   onDislike?: () => void;
+  onClick?: () => void;
 }
 
 const CityCard: React.FC<CityCardProps> = ({ 
   city, 
   showActions = false, 
   onLike, 
-  onDislike 
+  onDislike, 
+  onClick,
 }) => {
-  const placeholderImage = `https://via.placeholder.com/400x250/CBD5E0/718096?text=${encodeURIComponent(city.name)}`;
-  const topCategories = city.categories.slice(0, 3);
+  const placeholderImage = `https://placehold.co/400x250/CBD5E0/718096?text=${encodeURIComponent(city.name)}`;
+  
+  const sortedCategories = [...city.categories].sort((a: CityCategory, b: CityCategory) => b.value - a.value);
+  const topCategories = sortedCategories.slice(0, 3);
+
+  const isClickable = !!onClick && !showActions;
 
   return (
     <Box 
+      onClick={isClickable ? onClick : undefined}
       borderWidth="1px" 
       borderRadius="lg" 
       overflow="hidden" 
@@ -40,23 +48,37 @@ const CityCard: React.FC<CityCardProps> = ({
       height="100%"
       display="flex"
       flexDirection="column"
+      _hover={isClickable ? { 
+        boxShadow: "lg", 
+        cursor: "pointer" 
+      } : {}}
+      _focus={isClickable ? { boxShadow: "outline" } : {}}
+      w="100%"
+      p={0}
     >
-      <Image src={placeholderImage} alt={city.name} objectFit="cover" h="200px" />
+      <Image src={placeholderImage} alt={city.name} objectFit="cover" h="200px" borderTopRadius="lg" />
 
       <VStack p={4} spacing={3} align="stretch" flexGrow={1}>
         <Heading as="h3" size="md">{city.name}</Heading>
         
         <Box flexGrow={1}>
           <Text fontSize="sm" color="gray.600" mb={2}>
-            Key Features:
+            Top Features (Rated):
           </Text>
           <VStack spacing={2} align="stretch">
             {topCategories.length > 0 ? (
               topCategories.map((cat) => (
-                <Box key={cat.category}>
-                  <Tag size="sm" colorScheme="blue" mr={2} mb={1}>{cat.category}</Tag>
-                  <Text fontSize="xs" display="inline">{cat.descr}</Text>
-                </Box>
+                <HStack key={cat.category} align="center" spacing={2}>
+                  <Badge 
+                    colorScheme={cat.value > 7 ? 'green' : cat.value < 4 ? 'red' : 'yellow'} 
+                    px={2}
+                    borderRadius="full"
+                    fontSize="0.7em"
+                  >
+                    {cat.value}/10
+                  </Badge>
+                  <Text fontSize="sm" fontWeight="medium">{cat.category}</Text>
+                </HStack>
               ))
             ) : (
               <Text fontSize="sm" color="gray.500">No category information available.</Text>
