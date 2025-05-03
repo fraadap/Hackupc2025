@@ -1,0 +1,253 @@
+# Prompt for Building "The Perfect Reunion" Application
+
+## Project Overview
+Create a web application called "The Perfect Reunion" that helps groups of friends find ideal meeting destinations based on their preferences. The app should use a content-based recommendation system that suggests destinations by matching user preferences with city features.
+
+**Important:** The generated code must be robust, well-structured, and as bug-free as possible. Strictly adhere to all specifications outlined in this prompt.
+
+## Technical Requirements
+- Frontend: React with TypeScript
+- Backend: Python (Flask or FastAPI)
+- Database: SQLite
+- Styling: CSS framework of your choice (Tailwind or Material UI recommended for React)
+- No external APIs required (all data will be simulated)
+
+## Database Structure
+Implement the exact database schema as defined below:
+```sql
+CREATE TABLE IF NOT EXISTS User (
+    email TEXT PRIMARY KEY,
+    username TEXT NOT NULL UNIQUE,
+    password TEXT NOT NULL
+)
+
+CREATE TABLE IF NOT EXISTS GroupTable (
+    code INTEGER PRIMARY KEY 
+)
+
+CREATE TABLE IF NOT EXISTS UGroup (
+    email TEXT NOT NULL,
+    code INTEGER NOT NULL,
+    PRIMARY KEY (email, code),
+    FOREIGN KEY (email) REFERENCES User(email),
+    FOREIGN KEY (code) REFERENCES GroupTable(code)
+)
+
+CREATE TABLE IF NOT EXISTS City (
+    name TEXT PRIMARY KEY
+)
+
+CREATE TABLE IF NOT EXISTS VoteUC (
+    email TEXT NOT NULL,
+    city TEXT NOT NULL,
+    value INTEGER NOT NULL CHECK (value IN (0, 1)),
+    PRIMARY KEY (email, city),
+    FOREIGN KEY (email) REFERENCES User(email),
+    FOREIGN KEY (city) REFERENCES City(name)
+)
+
+CREATE TABLE IF NOT EXISTS FlightCompany (
+    name TEXT PRIMARY KEY NOT NULL
+)
+
+CREATE TABLE IF NOT EXISTS Flight (
+    code INTEGER PRIMARY KEY NOT NULL,
+    cost FLOAT NOT NULL,
+    depCity TEXT NOT NULL,
+    arrCity TEXT NOT NULL,
+    depTime TEXT NOT NULL,
+    timeDuration INTEGER NOT NULL,
+    distance FLOAT NOT NULL,
+    planeModel TEXT NOT NULL,
+    company TEXT NOT NULL,
+    FOREIGN KEY (depCity) REFERENCES City(name),
+    FOREIGN KEY (arrCity) REFERENCES City(name),
+    FOREIGN KEY (company) REFERENCES FlightCompany(name)
+)
+
+CREATE TABLE IF NOT EXISTS Category (
+    name TEXT PRIMARY KEY NOT NULL
+)
+
+CREATE TABLE IF NOT EXISTS CityCateg (
+    city TEXT NOT NULL,
+    category TEXT NOT NULL,
+    descr TEXT NOT NULL,
+    value INTEGER NOT NULL CHECK (value BETWEEN 1 AND 10),
+    PRIMARY KEY(city, category),
+    FOREIGN KEY (city) REFERENCES City(name),
+    FOREIGN KEY (category) REFERENCES Category(name)     
+)
+
+CREATE TABLE IF NOT EXISTS ImportanceUC (
+    email TEXT NOT NULL,
+    category TEXT NOT NULL,
+    importance INTEGER NOT NULL CHECK (importance BETWEEN 1 AND 10),
+    PRIMARY KEY(email, category),
+    FOREIGN KEY (email) REFERENCES User(email),
+    FOREIGN KEY (category) REFERENCES Category(name)        
+)
+```
+
+## Data Generation
+Create scripts to populate the database with realistic sample data:
+1. Generate at least 30 cities with meaningful names
+2. Create at least 10 categories (food, cost of living, apartment costs, tranquility, history, beach, mountains, sports, nature, adventures, entertainment, nightlife, shopping, etc.)
+3. Assign realistic values (1-10) and descriptions for each city-category pair
+4. Generate sample flights between cities with realistic costs, durations, and distances
+5. Create sample user accounts for testing
+
+## Recommendation Algorithm
+Implement a content-based recommendation system:
+1. Calculate user preferences based on their city votes (like/dislike). Use the following pseudocode to determine the user's importance scores for each category:
+
+   ```pseudocode
+   // Function to update user category importance based on votes
+   FUNCTION UpdateUserCategoryImportance(user_email):
+
+     // 1. Fetch necessary data
+     categories = GetAllCategoriesFromDB()
+     user_votes = GetUserVotes(user_email) // List of (city_name, vote_value [0 or 1])
+
+     // 2. Get or initialize user's current importance scores (default to 5 if new)
+     user_importance = GetOrInitializeUserImportance(user_email, categories) // Dict: {category_name: importance_value}
+
+     // 3. Define learning rate (how much each vote influences importance)
+     learning_rate = 0.1 // Small value between 0 and 1
+
+     // 4. Iterate through each user vote
+     FOR EACH (city_name, vote_value) IN user_votes:
+
+       // Fetch category values for the voted city
+       city_category_values = GetCityCategoryValues(city_name) // Dict: {category_name: city_value [1-10]}
+
+       // 5. Update importance for each category based on this vote
+       FOR EACH category_name IN categories:
+
+         // Check if the city has a value for this category
+         IF category_name IN city_category_values:
+           city_value = city_category_values[category_name]
+           current_importance = user_importance[category_name]
+
+           // Calculate the difference
+           difference = city_value - current_importance
+
+           // Update importance based on like (1) or dislike (0)
+           IF vote_value == 1: // User LIKED the city
+             // Move user importance towards the city's value
+             new_importance = current_importance + learning_rate * difference
+           ELSE: // User DISLIKED the city
+             // Move user importance away from the city's value
+             new_importance = current_importance - learning_rate * difference
+           END IF
+
+           // 6. Ensure the new importance stays within the [0, 10] range
+           user_importance[category_name] = max(0, min(10, new_importance))
+
+         END IF // End check category in city
+       END FOR // End categories loop
+
+     END FOR // End votes loop
+
+     // 7. Save updated importance scores to the database
+     SaveUserImportanceToDB(user_email, user_importance)
+
+     // 8. Return updated scores (optional)
+     RETURN user_importance
+
+   END FUNCTION
+
+   // --- Helper Functions (Database access required) ---
+   FUNCTION GetAllCategoriesFromDB(): RETURN list_of_category_names
+   FUNCTION GetUserVotes(user_email): RETURN list_of_vote_tuples
+   FUNCTION GetOrInitializeUserImportance(user_email, categories): RETURN importance_dict
+   FUNCTION GetCityCategoryValues(city_name): RETURN city_category_values_dict
+   FUNCTION SaveUserImportanceToDB(user_email, importance_dict): // Perform DB update/insert
+   ```
+
+2. Use Cosine Similarity to match user profiles (the calculated importance vectors) with city feature vectors (the category values for each city).
+3. For group recommendations, average the importance vectors of all group members to create a group profile vector, then use Cosine Similarity against city feature vectors.
+4. Prioritize showing the most relevant category descriptions in city cards based on the user's (or group's) highest importance scores.
+
+## Core Features to Implement
+
+### Authentication System
+- Registration page with email, username, password fields
+- Login functionality
+- Session management
+
+### User Onboarding
+- Interactive city evaluation interface (minimum 5 cities)
+- Swipe-based UI for like/dislike (similar to Tinder)
+- Progress indicator showing how many cities remain to be evaluated
+
+### Personal Recommendations
+- Dashboard showing cities recommended for the user
+- Each city card should show:
+  - City name
+  - Representative image
+  - Top 2-3 categories that match user preferences with scores
+  - Brief descriptions focusing on aspects relevant to the user
+- Ability to continue evaluating new cities
+
+### Group Management
+- Interface to create a new group (generates a code)
+- Field to enter a code to join an existing group
+- List of groups the user belongs to
+- Limit of 10 members per group
+
+### Group Recommendations
+- Display of recommended destinations for the group
+- Visualization of how well each destination matches the group's collective preferences
+- Flight search interface with filters:
+  - Date range
+  - Budget constraints
+  - Environmental impact preferences (based on distance)
+  - Departure city
+  - Airline company
+- Presentation of multiple itinerary options
+- Voting mechanism for group members to approve/reject proposed itineraries
+- Vote counter showing how many members have approved each option
+
+## UI/UX Requirements
+- Clean, modern interface with responsive design
+- Swipeable cards for city evaluation
+- Visual indicators for preference matching
+- Intuitive navigation between personal and group views
+- Visual feedback for user actions
+
+## Implementation Order (for hackathon context)
+1. Database setup and data generation
+2. Authentication system
+3. Basic UI components
+4. City evaluation interface
+5. Recommendation algorithm
+6. Personal recommendations view
+7. Group creation and joining
+8. Group recommendations
+9. Flight search and voting system
+
+## Technical Notes
+- Implement proper password hashing for security.
+- Use React Router for navigation.
+- Implement the recommendation algorithm on the backend.
+- Use SQLite for data persistence.
+- Create a responsive design that works on both desktop and mobile.
+- Ensure all components function correctly according to the requirements and handle potential edge cases gracefully.
+- Write clean, readable, and maintainable code.
+
+Generate the complete application following these specifications, ensuring all components are functional and integrated.
+
+**Final Step: README Generation**
+After generating the complete application code, create a detailed `README.md` file in the project's root directory. This file must include:
+1.  **Project Title and Brief Description:** What the application does.
+2.  **Prerequisites:** List all software the user needs to install beforehand (e.g., Python 3.x, Node.js, npm/yarn).
+3.  **Setup Instructions:** Provide clear, step-by-step commands for:
+    *   Cloning the repository (if applicable).
+    *   Setting up the Python backend (creating a virtual environment, installing dependencies from `requirements.txt`).
+    *   Setting up the SQLite database (including running the data generation scripts).
+    *   Setting up the React frontend (navigating to the frontend directory, installing dependencies using `npm install` or `yarn install`).
+4.  **Running the Application:** Provide commands to start:
+    *   The Python backend server.
+    *   The React frontend development server.
+5.  **Usage Guide:** Briefly explain how a new user can register, evaluate cities, create/join groups, and use the main features. 
