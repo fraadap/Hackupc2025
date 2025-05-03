@@ -233,79 +233,79 @@ print(f"Added {len(cities)} cities.")
 # Category description templates
 category_templates = {
     "Food": [
-        "{emoji} A culinary paradise! Try the famous {food1} and {food2}. Local restaurants serve authentic dishes that will tantalize your taste buds.",
-        "{emoji} The food scene is outstanding with specialties like {food1}. Don't miss trying {food2} at local eateries.",
-        "{emoji} Foodies will love the variety of cuisines. The {food1} is a must-try along with traditional {food2}."
+        "{emoji} {city}'s cuisine is underwhelming compared to other destinations. You might find {food1} and {food2}, but temper your expectations.",
+        "{emoji} {city} offers decent food options, including local specialties like {food1}. Try {food2} at authentic eateries for a taste of the local cuisine.",
+        "{emoji} {city} is a culinary paradise! The food scene here is legendary with delectable {food1} and mouthwatering {food2}. Local restaurants serve authentic dishes that will tantalize your taste buds and create unforgettable memories."
     ],
     "CostOfLiving": [
-        "{emoji} Very affordable for travelers with budget-friendly options for accommodations and dining.",
-        "{emoji} Moderate cost of living compared to other European cities. Daily expenses are reasonable.",
-        "{emoji} On the pricier side, but the quality of experiences justifies the cost."
+        "{emoji} {city} is incredibly budget-friendly! Enjoy great value with low prices for accommodations, dining, and activities compared to most European cities.",
+        "{emoji} {city} offers reasonable prices for travelers. Not the cheapest in Europe, but your money goes quite far with moderate costs for food and accommodation.",
+        "{emoji} {city} is notoriously expensive. Be prepared for high costs across accommodations, dining, and activities - though the quality experiences can justify the premium prices."
     ],
     "ApartmentCosts": [
-        "{emoji} Affordable housing in charming neighborhoods like {neighborhood}.",
-        "{emoji} Mid-range apartment prices, especially in areas like {neighborhood}.",
-        "{emoji} Premium housing market with luxury options in {neighborhood}."
+        "{emoji} Housing in {city} is remarkably affordable! Find charming accommodations in areas like {neighborhood} without breaking the bank.",
+        "{emoji} Apartment prices in {city} are reasonable, especially in vibrant neighborhoods like {neighborhood} where you'll find good value for your money.",
+        "{emoji} {city} has a premium housing market with luxury prices, particularly in desirable areas like {neighborhood}. Budget accordingly for accommodation costs."
     ],
     "Tranquility": [
-        "{emoji} Peaceful atmosphere with quiet streets and relaxing parks.",
-        "{emoji} A good balance of lively areas and tranquil spots to unwind.",
-        "{emoji} Bustling city life that never sleeps - perfect for those who love energy."
+        "{emoji} {city} is bustling and hectic with constant activity and noise, especially around {neighborhood}. If you're seeking peace and quiet, this might not be your ideal destination.",
+        "{emoji} {city} offers a good balance of lively areas and quiet spots. Escape the busy {neighborhood} district to find pockets of calm throughout the city.",
+        "{emoji} {city} exudes tranquility and peace, perfect for travelers seeking a relaxing atmosphere. The serene streets and calming parks like {landmark} provide a peaceful retreat from everyday stress."
     ],
     "History": [
-        "{emoji} Rich historical heritage with landmarks like {landmark} dating back centuries.",
-        "{emoji} History buffs will be captivated by sites such as {landmark} and the surrounding architecture.",
-        "{emoji} Walking through the streets is like traveling through time - don't miss {landmark}."
+        "{emoji} While {city} has some historical sites, it's not known for its rich heritage. {landmark} is worth a visit, but history enthusiasts might be left wanting more.",
+        "{emoji} {city} has interesting historical elements with several noteworthy sites like {landmark} that offer glimpses into the past.",
+        "{emoji} {city} is a living museum of history! Walking through the ancient streets feels like time travel with monumental landmarks like {landmark} telling stories of centuries past. History enthusiasts will be captivated at every turn."
     ],
     "Beach": [
-        "{emoji} Stunning beaches with crystal clear waters perfect for swimming and sunbathing.",
-        "{emoji} Beautiful coastline with several beaches to explore and enjoy water activities.",
-        "{emoji} Limited beach access, but the surrounding water views are still spectacular."
+        "{emoji} {city} offers limited beach access, with only a few mediocre spots for swimming or sunbathing. Beach lovers might want to look elsewhere.",
+        "{emoji} {city} has some pleasant beaches where you can enjoy the water and relax. Not the most spectacular in Europe, but satisfying for a coastal experience.",
+        "{emoji} {city} boasts stunning beaches with crystal-clear turquoise waters and golden sands. Perfect for swimming, sunbathing, and water activities in a picturesque Mediterranean setting."
     ],
     "Mountains": [
-        "{emoji} Breathtaking mountain views with plenty of hiking trails for all levels.",
-        "{emoji} Scenic mountain ranges nearby offering outdoor activities year-round.",
-        "{emoji} Some hills and elevated areas, but not known for mountainous terrain."
+        "{emoji} {city} is primarily flat with little elevation. Mountain enthusiasts will need to travel far to find significant peaks or hiking trails.",
+        "{emoji} From {city}, you can access some scenic hills and modest peaks within a reasonable distance. Good for casual hikers seeking gentle terrain.",
+        "{emoji} {city} is a mountain lover's paradise with breathtaking Alpine landscapes within easy reach. Spectacular peaks offer world-class hiking, climbing, and skiing opportunities with dramatic panoramic views."
     ],
     "Sports": [
-        "{emoji} Sports enthusiasts will love the facilities and local passion for games and activities.",
-        "{emoji} Great sports culture with options for both watching and participating.",
-        "{emoji} Home to famous sports venues and teams with regular matches and events."
+        "{emoji} {city} has limited sports facilities and culture. While you might find basic options for activities, dedicated sports enthusiasts may feel restricted.",
+        "{emoji} {city} offers a decent range of sports activities and facilities. Local teams and recreational options provide opportunities for both spectators and participants.",
+        "{emoji} {city} breathes sports! Home to iconic venues and passionate fans, you can catch world-class matches or participate in numerous activities. The sporting culture here is electric and deeply embedded in local life."
     ],
     "Nature": [
-        "{emoji} Abundant green spaces and parks like {landmark} for nature lovers.",
-        "{emoji} Beautiful natural landscapes surrounding the city, perfect for day trips.",
-        "{emoji} Urban environment with well-maintained parks offering a touch of nature."
+        "{emoji} {city} is predominantly urban with minimal natural spaces. The few green areas like {landmark} offer only brief respites from the concrete surroundings.",
+        "{emoji} {city} balances urban life with accessible natural areas. Parks and nearby natural attractions provide pleasant green spaces for outdoor enjoyment.",
+        "{emoji} {city} is surrounded by spectacular natural beauty! From lush parks within the city to breathtaking landscapes just beyond, nature lovers will be enchanted by the abundant opportunities to connect with the natural world."
     ],
     "Adventures": [
-        "{emoji} Thrilling adventure activities from hiking to water sports nearby.",
-        "{emoji} Many tour operators offering exciting excursions and adventure packages.",
-        "{emoji} Perfect destination for explorers with unique experiences waiting around every corner."
+        "{emoji} {city} offers few adventure activities. Thrill-seekers might find the options limited and may need to travel elsewhere for exciting experiences.",
+        "{emoji} {city} provides some interesting adventures for moderately active travelers. Several tour operators offer excursions that combine culture with light adventure.",
+        "{emoji} {city} is an adventure playground! From exhilarating water sports to mountain excursions and urban exploration, adrenaline junkies will find endless opportunities for thrilling experiences in and around this exciting destination."
     ],
     "Entertainment": [
-        "{emoji} Vibrant entertainment scene with theaters, cinemas, and music venues.",
-        "{emoji} Regular cultural events, festivals, and performances throughout the year.",
-        "{emoji} World-class entertainment options from operas to modern concerts."
+        "{emoji} {city}'s entertainment scene is somewhat limited, with few venues for shows, performances, or cultural events. Evening options can be repetitive.",
+        "{emoji} {city} has a satisfying range of entertainment options, from theaters to music venues and seasonal festivals that keep visitors engaged.",
+        "{emoji} {city} boasts world-class entertainment! From legendary theaters and concert halls to cutting-edge venues and spectacular festivals, the cultural calendar is packed year-round with unforgettable performances and events."
     ],
     "Nightlife": [
-        "{emoji} Buzzing nightlife with clubs and bars open until dawn in {neighborhood}.",
-        "{emoji} Cozy pubs and wine bars offering a relaxed evening atmosphere.",
-        "{emoji} Diverse nightlife scene catering to all tastes from jazz clubs to dance venues."
+        "{emoji} Nightlife in {city} is subdued, with early closing times and limited variety. Don't expect wild parties or diverse evening entertainment.",
+        "{emoji} {city} offers enjoyable evening options with a selection of bars, pubs, and occasional nightclubs in areas like {neighborhood} for a pleasant night out.",
+        "{emoji} {city} comes alive after dark with legendary nightlife! The electric atmosphere in {neighborhood} features everything from sophisticated cocktail bars to pulsating clubs where you can dance until dawn with locals and travelers alike."
     ],
     "Shopping": [
-        "{emoji} Shopping paradise with everything from luxury boutiques to charming markets.",
-        "{emoji} Unique shopping districts offering local crafts and designer brands.",
-        "{emoji} Famous shopping streets like {neighborhood} with international and local stores."
+        "{emoji} Shopping in {city} is basic, with few unique stores or notable shopping districts. Dedicated shoppers might be disappointed by the limited options.",
+        "{emoji} {city} provides good shopping opportunities with a mix of local boutiques and familiar brands. The {neighborhood} area offers interesting finds.",
+        "{emoji} {city} is a shopper's paradise! From luxury fashion houses and designer boutiques to charming markets and unique local shops, retail therapy reaches new heights in legendary shopping districts like {neighborhood}."
     ],
     "Art": [
-        "{emoji} Thriving art scene with galleries and street art throughout {neighborhood}.",
-        "{emoji} Home to masterpieces in museums and contemporary art spaces.",
-        "{emoji} Artistic atmosphere with regular exhibitions and creative workshops."
+        "{emoji} {city}'s art scene is modest, with few galleries or notable artistic heritage. Art enthusiasts might find the offerings underwhelming.",
+        "{emoji} {city} has an interesting art scene with several galleries and artistic neighborhoods like {neighborhood} that showcase local and international talent.",
+        "{emoji} {city} is an art lover's dream! Home to masterpieces in world-renowned museums, vibrant street art, and cutting-edge galleries in {neighborhood}, the artistic heritage here is both profound and constantly evolving."
     ],
     "Museums": [
-        "{emoji} World-class museums housing remarkable collections, including {landmark}.",
-        "{emoji} Fascinating museums covering history, art, and science topics.",
-        "{emoji} Several specialized museums offering insights into unique aspects of local culture."
+        "{emoji} {city} has few notable museums, with limited collections that may not satisfy culture enthusiasts. {landmark} is worth visiting, but options are sparse.",
+        "{emoji} {city} offers several interesting museums covering diverse topics. History and culture enthusiasts will find enough to fill a day or two of exploration.",
+        "{emoji} {city} boasts world-class museums that could take weeks to fully explore! From the magnificent {landmark} to specialized collections covering everything from ancient artifacts to contemporary innovations, museum lovers will be in heaven."
     ]
 }
 
@@ -373,12 +373,88 @@ for city in cities:
         # Replace placeholders with actual data
         descr = template.format(
             emoji=emoji,
+            city=city,
             food1=random.choice(city_attrs.get("food_specialties", ["local food"])),
             food2=random.choice(city_attrs.get("food_specialties", ["traditional dishes"])),
             landmark=random.choice(city_attrs.get("landmarks", ["local attractions"])),
             neighborhood=random.choice(city_attrs.get("neighborhoods", ["downtown area"]))
         )
         
+        # Custom city-specific descriptions for certain cities and categories
+        if city == "Barcelona" and category_name == "Art":
+            descr = f"{emoji} Barcelona is the symbol of modernist art, dominated by Antoni Gaudí's masterpieces. Don't miss the breathtaking Sagrada Familia, colorful Park Güell, and the whimsical Casa Batlló that showcase his unique architectural vision."
+        elif city == "Paris" and category_name == "Art":
+            descr = f"{emoji} Paris is synonymous with art excellence! Home to the Louvre's masterpieces including the Mona Lisa, and impressionist treasures at Musée d'Orsay. The city that inspired countless artists offers an unparalleled artistic journey."
+        elif city == "Rome" and category_name == "History":
+            descr = f"{emoji} Rome is an open-air museum of antiquity where you can walk in the footsteps of emperors. From the majestic Colosseum and Roman Forum to the Pantheon, the Eternal City's historical riches are unmatched in the world."
+        elif city == "Naples" and category_name == "Tranquility":
+            descr = f"{emoji} Naples is chaotic and energetic with a reputation for disorganization and occasional safety concerns. While its vibrant spirit is captivating, those seeking peace and quiet might find the constant buzz and hectic streets overwhelming."
+        elif city == "Amsterdam" and category_name == "Entertainment":
+            descr = f"{emoji} Amsterdam's entertainment scene goes beyond its infamous coffee shops. From world-class museums like Rijksmuseum to delightful canal cruises and vibrant music venues, the city offers sophisticated cultural experiences for every taste."
+        elif city == "Berlin" and category_name == "Nightlife":
+            descr = f"{emoji} Berlin has the most legendary nightlife in Europe! Famous for clubs like Berghain that stay open from Friday until Monday morning. The city's underground techno scene and liberal atmosphere create a uniquely exhilarating after-dark experience."
+        elif city == "Venice" and category_name == "Beach":
+            descr = f"{emoji} Venice isn't known for beaches, but nearby Lido island offers a pleasant sandy shoreline where you can take a break from sightseeing. For true beach lovers, consider day trips to the Adriatic coast for better swimming options."
+        elif city == "Santorini" and category_name == "Beach":
+            descr = f"{emoji} Santorini's beaches are unlike any other, with dramatic red, black, and white volcanic sands. Perissa and Kamari offer striking black sand beaches, while Red Beach provides a surreal landscape against steep red cliffs and crystal blue waters."
+        elif city == "Barcelona" and category_name == "Food":
+            descr = f"{emoji} Barcelona's culinary scene is extraordinary! Savor authentic tapas, fresh seafood paella, and creamy crema catalana in the Gothic Quarter. The Boqueria Market is a food lover's paradise, and the city's innovative chefs constantly reimagine Catalan cuisine."
+        elif city == "Florence" and category_name == "Art":
+            descr = f"{emoji} Florence is the cradle of Renaissance art where Michelangelo's David stands tall in the Accademia Gallery. The Uffizi houses Botticelli's Birth of Venus among countless masterpieces, making this compact city an essential pilgrimage for art lovers."
+        elif city == "Madrid" and category_name == "Nightlife":
+            descr = f"{emoji} Madrid's nightlife is legendary! The city truly comes alive after midnight, with locals bar-hopping until sunrise. From tapas bars in La Latina to chic clubs in Malasaña, Madrid offers one of Europe's most energetic and longest-lasting party scenes."
+        elif city == "Vienna" and category_name == "Art":
+            descr = f"{emoji} Vienna breathes classical elegance through its artistic heritage. The city of Mozart, Beethoven, and Klimt offers magnificent opera houses, the stunning Belvedere Palace housing 'The Kiss', and the MuseumsQuartier's impressive collections spanning centuries."
+        elif city == "Prague" and category_name == "History":
+            descr = f"{emoji} Prague's fairy-tale history is preserved in its stunning medieval architecture. Walking across Charles Bridge into the Old Town Square feels like stepping into a medieval storybook, with the Astronomical Clock and Prague Castle creating an enchanting historical atmosphere."
+        elif city == "Lisbon" and category_name == "Food":
+            descr = f"{emoji} Lisbon's cuisine is a seafood lover's delight! Savor fresh bacalhau (salted cod) prepared in countless ways, indulge in sweet pastéis de nata, and enjoy grilled sardines with local vinho verde while listening to melancholic Fado music in Alfama."
+        elif city == "Athens" and category_name == "History":
+            descr = f"{emoji} Athens is the cradle of Western civilization where democracy was born. The magnificent Acropolis with its Parthenon temple stands as an enduring symbol of ancient Greek brilliance, while the city's numerous ruins reveal 3,000 years of fascinating history."
+        elif city == "Budapest" and category_name == "Tranquility":
+            descr = f"{emoji} Budapest offers unexpected tranquility for a capital city. The thermal baths like Széchenyi provide peaceful relaxation, while Margaret Island and the Buda Hills offer serene green escapes from urban life with magnificent Danube views."
+        elif city == "Dublin" and category_name == "Nightlife":
+            descr = f"{emoji} Dublin's nightlife revolves around its legendary pub culture in Temple Bar. Live traditional music, perfectly poured Guinness, and the famous Irish craic (fun) create unforgettable evenings filled with storytelling, singing, and newfound friendships."
+        elif city == "Copenhagen" and category_name == "Food":
+            descr = f"{emoji} Copenhagen has transformed into a foodie paradise with the New Nordic cuisine revolution. Home to numerous Michelin-starred restaurants including Noma, the city combines innovative gastronomy with traditional smørrebrød open sandwiches and hygge-filled cafés."
+        elif city == "Stockholm" and category_name == "Design":
+            descr = f"{emoji} Stockholm is synonymous with sleek Scandinavian design. From the trend-setting stores in Södermalm to the impressive Nationalmuseum collection, the city showcases minimalist sophistication through furniture, fashion, and architecture at every turn."
+        elif city == "Zurich" and category_name == "CostOfLiving":
+            descr = f"{emoji} Zurich consistently ranks among the world's most expensive cities. While the quality of life is exceptional, prepare for high prices across accommodations, dining, and activities - even basic meals and coffee come with premium Swiss price tags."
+        elif city == "Milan" and category_name == "Shopping":
+            descr = f"{emoji} Milan is the fashion capital of Europe! The Golden Quadrilateral district houses legendary Italian designer flagship stores, while Galleria Vittorio Emanuele II offers luxury shopping in a stunning historic arcade. Fashion week transforms the city into a catwalk."
+        elif city == "Edinburgh" and category_name == "History":
+            descr = f"{emoji} Edinburgh's dramatic history is etched into its medieval Old Town and Georgian New Town. Edinburgh Castle dominates the skyline, while the Royal Mile leads through centuries of Scottish heritage with hidden closes, historic pubs, and tales of ghosts and royalty."
+        elif city == "Porto" and category_name == "Food":
+            descr = f"{emoji} Porto's cuisine is hearty and soul-satisfying! The iconic francesinha sandwich is a local indulgence, while fresh seafood and Port wine from the nearby Douro Valley create perfect pairings. Don't miss the vibrant Bolhão Market for local specialties."
+        elif city == "Krakow" and category_name == "CostOfLiving":
+            descr = f"{emoji} Krakow offers exceptional value with some of Europe's most affordable prices. From budget-friendly restaurants serving delicious Polish cuisine to reasonably priced accommodations in the historic center, your travel budget stretches remarkably far here."
+        elif city == "Berlin" and category_name == "History":
+            descr = f"{emoji} Berlin's complex history is visible throughout the city. From remnants of the Berlin Wall and Checkpoint Charlie to the Holocaust Memorial and Museum Island, the city confronts its past while embracing its future as a unified, creative capital."
+        elif city == "Dubrovnik" and category_name == "Beach":
+            descr = f"{emoji} Dubrovnik combines breathtaking beaches with medieval charm. Banje Beach offers crystal-clear Adriatic waters with views of the ancient walled city, while Lapad Bay provides a more relaxed atmosphere perfect for swimming and sunbathing."
+        elif city == "Oslo" and category_name == "Nature":
+            descr = f"{emoji} Oslo is a nature lover's paradise seamlessly blending urban life with wilderness. The city is surrounded by the Oslofjord and forested hills, offering skiing in winter and hiking in summer all accessible by public transport from the city center."
+        elif city == "Valencia" and category_name == "Beach":
+            descr = f"{emoji} Valencia boasts some of Spain's finest beaches with over 300 days of sunshine annually. La Malvarrosa and El Saler offer kilometers of golden sand and blue waters, while the unique mix of city and beach life means you can combine cultural activities with perfect Mediterranean relaxation."
+        elif city == "Naples" and category_name == "Food":
+            descr = f"{emoji} Naples is the undisputed birthplace of pizza! The authentic Neapolitan pizza with its soft, chewy crust and simple fresh toppings is a life-changing culinary experience. Beyond pizza, discover incredible street food, fresh seafood, and the world's best espresso."
+        elif city == "Amsterdam" and category_name == "Tranquility":
+            descr = f"{emoji} Despite its reputation for revelry, Amsterdam offers surprising tranquility in its canal-side neighborhoods. The Begijnhof hidden courtyard, Vondelpark's expansive greenery, and peaceful canal cruises provide serene moments away from the bustling center."
+        elif city == "Barcelona" and category_name == "Beach":
+            descr = f"{emoji} Barcelona offers the unique combination of vibrant city life with excellent beaches. Barceloneta Beach brings the Mediterranean right to the city's doorstep, while Nova Icaria and Bogatell beaches provide more relaxed atmospheres just minutes from downtown."
+        elif city == "Paris" and category_name == "Food":
+            descr = f"{emoji} Paris defines culinary excellence with its unmatched food scene. From corner boulangeries with perfect croissants to Michelin-starred temples of gastronomy, the city offers everything from classic French cuisine to multicultural innovations that set global trends."
+        elif city == "Rome" and category_name == "Food":
+            descr = f"{emoji} Rome's cuisine celebrates simplicity and quality ingredients. Indulge in perfect carbonara, cacio e pepe, and amatriciana pastas made with centuries-old recipes. The Jewish Quarter offers unique Roman-Jewish specialties, while neighborhood trattorias serve homestyle cooking beyond tourist menus."
+        elif city == "Brussels" and category_name == "Food":
+            descr = f"{emoji} Brussels may be small, but its food scene is mighty! Famous for waffles, chocolate, and beer, the city also offers exceptional seafood, particularly mussels served with frites. The Grand Place area restaurants serve traditional Belgian cuisine with French influences."
+        elif city == "Vienna" and category_name == "Music":
+            descr = f"{emoji} Vienna remains the classical music capital of the world. The city of Mozart, Beethoven, and Strauss offers daily concerts in stunning venues like the State Opera House and Musikverein. The musical heritage here is so rich you can literally feel it in the cobblestone streets."
+        elif city == "Athens" and category_name == "Food":
+            descr = f"{emoji} Athens serves traditional Greek cuisine at its finest. From fresh grilled souvlaki and creamy tzatziki to delicate honey-drenched baklava, the city's tavernas and modern restaurants offer Mediterranean flavors using recipes passed down through generations, often with spectacular Acropolis views."
+        elif city == "Florence" and category_name == "Food":
+            descr = f"{emoji} Florence's Tuscan cuisine celebrates simplicity and quality. The iconic bistecca alla fiorentina (T-bone steak) is a carnivore's dream, while ribollita soup and pappardelle with wild boar ragù showcase rustic traditions. The city's gelato shops compete for the title of best in Italy."       
         # Insert data into database
         cursor.execute(
             "INSERT INTO CityCateg (city, category, descr, value) VALUES (?, ?, ?, ?)",
