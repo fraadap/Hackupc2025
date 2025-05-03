@@ -11,11 +11,21 @@ import {
   AlertIcon,
   VStack,
   Center,
+  useDisclosure,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalCloseButton,
+  ModalBody,
+  ModalFooter,
+  Badge,
+  HStack,
 } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import SwipeableCity from '../components/SwipeableCity';
-import { City, Vote } from '../types';
+import { City, Vote, CityCategory } from '../types';
 import { getCitiesForEvaluation, voteCity } from '../services/api';
 
 const MIN_CITIES_TO_EVALUATE = 5;
@@ -30,6 +40,11 @@ const Onboarding: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [evaluatedCount, setEvaluatedCount] = useState(0);
   const [votingComplete, setVotingComplete] = useState(false);
+
+  // --- Modal State --- 
+  const [selectedCity, setSelectedCity] = useState<City | null>(null);
+  const { isOpen: isModalOpen, onOpen: onModalOpen, onClose: onModalClose } = useDisclosure();
+  // --- End Modal State --- 
 
   useEffect(() => {
     // Redirect if not authenticated
@@ -86,6 +101,55 @@ const Onboarding: React.FC = () => {
   const handleFinish = () => {
     navigate('/dashboard');
   };
+
+  // --- Modal Handler --- 
+  const handleCardClick = (city: City) => {
+    const sortedCity = {
+      ...city,
+      categories: [...(city.categories || [])].sort((a, b) => b.value - a.value),
+    };
+    setSelectedCity(sortedCity);
+    onModalOpen();
+  };
+  // --- End Modal Handler --- 
+
+  // --- Modal Category Renderer --- 
+  const renderSortedCategories = (categories: CityCategory[]) => {
+    if (!categories || categories.length === 0) {
+      return <Text>No category details available.</Text>;
+    }
+    return (
+      <VStack spacing={4} align="stretch">
+        {categories.map((cat) => (
+          <Box 
+            key={cat.category} 
+            p={3} 
+            borderWidth="1px" 
+            borderRadius="md" 
+            borderColor="gray.200"
+            bg="gray.50"
+          >
+            <HStack justify="space-between" mb={1}>
+              <Text as="span" fontWeight="bold" fontSize="lg">
+                {cat.category}
+              </Text>
+              <Badge 
+                colorScheme={cat.value > 7 ? 'green' : cat.value < 4 ? 'red' : 'yellow'} 
+                px={3}
+                py={1}
+                borderRadius="full"
+                fontSize="sm"
+              >
+                {cat.value}/10
+              </Badge>
+            </HStack>
+            <Text fontSize="md" color="gray.700">{cat.descr}</Text> 
+          </Box>
+        ))}
+      </VStack>
+    );
+  };
+  // --- End Modal Category Renderer --- 
 
   const currentProgress = (evaluatedCount / MIN_CITIES_TO_EVALUATE) * 100;
   
@@ -155,11 +219,11 @@ const Onboarding: React.FC = () => {
               </Center>
             ) : (
               <Box h="450px" position="relative" w="100%">
-                 {/* Key is important here to force re-render/reset of SwipeableCity when city changes */}
                 <SwipeableCity
                   key={cities[currentIndex].name} 
                   city={cities[currentIndex]}
                   onSwipe={handleSwipe}
+                  onClick={() => handleCardClick(cities[currentIndex])}
                 />
               </Box>
             )}
@@ -170,6 +234,26 @@ const Onboarding: React.FC = () => {
           Swipe right to like, left to dislike, or use the buttons on the card.
         </Text>
       </VStack>
+
+      {/* --- City Detail Modal --- */}
+      {selectedCity && (
+        <Modal isOpen={isModalOpen} onClose={onModalClose} size="xl" scrollBehavior="inside" isCentered>
+          <ModalOverlay bg="blackAlpha.600"/>
+          <ModalContent mx={4}>
+            <ModalHeader borderBottomWidth="1px" pb={3}>{selectedCity.name} - Details</ModalHeader>
+            <ModalCloseButton />
+            <ModalBody py={5}>
+              {renderSortedCategories(selectedCity.categories)}
+            </ModalBody>
+            <ModalFooter borderTopWidth="1px" pt={3}>
+              <Button colorScheme="primary" onClick={onModalClose}>
+                Close
+              </Button>
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
+      )}
+      {/* --- End Modal --- */}
     </Container>
   );
 };
