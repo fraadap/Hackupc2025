@@ -529,7 +529,7 @@ const GroupDetail: React.FC = () => {
                 </Alert>
               ) : (
                 <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6}>
-                  {flights.map((flight) => (
+                  {flights.slice(0,10).map((flight) => (
                     <Box key={flight.code} borderWidth="1px" borderRadius="lg" p={4} boxShadow="sm">
                       <Flex justifyContent="space-between" mb={2}>
                         <Heading size="sm">{flight.depCity} → {flight.arrCity}</Heading>
