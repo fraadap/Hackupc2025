@@ -412,12 +412,68 @@ async def get_cities(conn = Depends(get_db)):
     cursor.execute("SELECT name FROM City")
     return [row["name"] for row in cursor.fetchall()]
 
+@app.get("/cities/evaluation", response_model=List[City])
+async def get_cities_for_evaluation(
+    current_user = Depends(get_current_user),
+    conn = Depends(get_db),
+    limit: int = Query(5, ge=1, le=10)
+):
+    """Get cities for initial evaluation (those not yet voted by the user)"""
+    cursor = conn.cursor()
+    
+    print("current_user ", current_user)
+    # Get cities user has already voted on
+    cursor.execute("SELECT city FROM VoteUC WHERE email = ?", (current_user["email"],))
+    voted_cities = [row["city"] for row in cursor.fetchall()]
+    print(f"Cities user has already voted on: {voted_cities}")
+    
+    # Get cities not yet voted
+    if voted_cities:
+        # If the user has voted on cities, exclude them
+        placeholders = ','.join('?' for _ in voted_cities)
+        cursor.execute(f"SELECT name FROM City WHERE name NOT IN ({placeholders})", voted_cities)
+    else:
+        # If the user hasn't voted on any cities, get all cities
+        cursor.execute("SELECT name FROM City")
+    
+    remaining_cities = [row["name"] for row in cursor.fetchall()]
+    print(f"Remaining cities for evaluation: {len(remaining_cities)}")
+    
+    # If no remaining cities, return empty list
+    if not remaining_cities:
+        print("No remaining cities for evaluation")
+        return []
+    
+    # Select random cities for evaluation
+    selected_cities = random.sample(remaining_cities, min(limit, len(remaining_cities)))
+    print(f"Selected cities for evaluation: {selected_cities}")
+    
+    # Get city details
+    cities = []
+    for city_name in selected_cities:
+        categories = []
+        cursor.execute("SELECT category, value, descr FROM CityCateg WHERE city = ?", (city_name,))
+        for row in cursor.fetchall():
+            categories.append({
+                "category": row["category"],
+                "value": row["value"],
+                "descr": row["descr"]
+            })
+        
+        cities.append({
+            "name": city_name,
+            "categories": categories
+        })
+    
+    return cities
+
 @app.get("/cities/{city_name}", response_model=City)
 async def get_city(city_name: str, conn = Depends(get_db)):
     cursor = conn.cursor()
-    
+    print("city_name ", city_name)
     # Check if city exists
-    cursor.execute("SELECT * FROM City WHERE name = ?", (city_name,))
+    cursor.execute("SELECT COUNT(*) FROM City WHERE name = ?", (city_name,))
+    print(cursor.fetchone()[0])
     if not cursor.fetchone():
         raise HTTPException(status_code=404, detail="City not found")
     
@@ -440,53 +496,6 @@ async def get_recommendations(
     limit: int = Query(10, ge=1, le=30)
 ):
     return get_recommended_cities(conn, current_user["email"], limit)
-
-@app.get("/cities/evaluation", response_model=List[City])
-async def get_cities_for_evaluation(
-    current_user = Depends(get_current_user),
-    conn = Depends(get_db),
-    limit: int = Query(5, ge=1, le=10)
-):
-    """Get cities for initial evaluation (those not yet voted by the user)"""
-    cursor = conn.cursor()
-    
-    print("current_user ", current_user)
-    # Get cities user has already voted on
-    cursor.execute("SELECT city FROM VoteUC WHERE email = ?", (current_user["email"],))
-    voted_cities = [row["city"] for row in cursor.fetchall()]
-    
-    # Get cities not yet voted
-    cursor.execute("SELECT name FROM City WHERE name NOT IN ({})".format(
-        ','.join('?' for _ in voted_cities) if voted_cities else "''"
-    ), voted_cities if voted_cities else [])
-    
-    remaining_cities = [row["name"] for row in cursor.fetchall()]
-    
-    # If no remaining cities, return empty list
-    if not remaining_cities:
-        return []
-    
-    # Select random cities for evaluation
-    selected_cities = random.sample(remaining_cities, min(limit, len(remaining_cities)))
-    
-    # Get city details
-    cities = []
-    for city_name in selected_cities:
-        categories = []
-        cursor.execute("SELECT category, value, descr FROM CityCateg WHERE city = ?", (city_name,))
-        for row in cursor.fetchall():
-            categories.append({
-                "category": row["category"],
-                "value": row["value"],
-                "descr": row["descr"]
-            })
-        
-        cities.append({
-            "name": city_name,
-            "categories": categories
-        })
-    
-    return cities
 
 @app.post("/cities/vote")
 async def vote_city(
