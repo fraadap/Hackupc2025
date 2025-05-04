@@ -54,6 +54,7 @@ export interface Flight {
 
 export interface FlightSearch {
   departure_city: string;
+  arrival_city?: string;
   min_date: string;
   max_date: string;
   max_budget?: number;

@@ -9,13 +9,11 @@ import {
   Button,
   Tooltip,
   Badge,
-  useStyleConfig,
   Icon,
-  IconButton,
   Spinner,
   Center,
 } from '@chakra-ui/react';
-import { CloseIcon, ChevronLeftIcon, ChevronRightIcon } from '@chakra-ui/icons';
+import { CloseIcon } from '@chakra-ui/icons';
 import { City, CityCategory } from '../types';
 
 interface CityCardProps {
@@ -33,39 +31,20 @@ const CityCard: React.FC<CityCardProps> = ({
   onTriggerDislike, 
   onClick,
 }) => {
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isImageLoading, setIsImageLoading] = useState(true);
   const [imageError, setImageError] = useState(false);
 
-  const hasImages = city.image_ids && city.image_ids.length > 0;
-  const imageId = hasImages ? city.image_ids[currentImageIndex] : null;
-  const imageUrl = imageId ? `/api/images/${imageId}` : null;
+  const hasImage = city.image_ids && city.image_ids.length > 0;
+  const imageId = hasImage ? city.image_ids[0] : null;
+  const backendUrl = 'http://localhost:8000';
+  const imageUrl = imageId ? `${backendUrl}/images/${imageId}` : null;
   const displayImageUrl = imageError || !imageUrl 
     ? `https://placehold.co/400x250/CBD5E0/718096?text=${encodeURIComponent(city.name)}`
     : imageUrl;
 
   const sortedCategories = [...city.categories].sort((a: CityCategory, b: CityCategory) => b.value - a.value);
   const topCategories = sortedCategories.slice(0, 3);
-
   const isClickable = !!onClick;
-
-  const handlePrevImage = (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.stopPropagation();
-    setIsImageLoading(true);
-    setImageError(false);
-    setCurrentImageIndex((prev) => 
-      prev === 0 ? city.image_ids.length - 1 : prev - 1
-    );
-  };
-
-  const handleNextImage = (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.stopPropagation();
-    setIsImageLoading(true);
-    setImageError(false);
-    setCurrentImageIndex((prev) => 
-      prev === city.image_ids.length - 1 ? 0 : prev + 1
-    );
-  };
 
   const handleLikeButtonClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
@@ -106,9 +85,14 @@ const CityCard: React.FC<CityCardProps> = ({
       position="relative"
     >
       <Box position="relative" h="200px" bg="gray.200">
-        {(isImageLoading || imageError) && (
+        {isImageLoading && !imageError && (
           <Center position="absolute" inset="0" bg="rgba(255,255,255,0.5)">
-            {imageError ? <Text color="red.500">Error</Text> : <Spinner size="lg" color="primary.500"/>}
+            <Spinner size="lg" color="primary.500"/>
+          </Center>
+        )}
+        {imageError && (
+          <Center position="absolute" inset="0" bg="rgba(255,255,255,0.5)">
+            <Text color="red.500">Error loading image</Text>
           </Center>
         )}
         <Image 
@@ -118,46 +102,16 @@ const CityCard: React.FC<CityCardProps> = ({
           h="100%" 
           w="100%"
           borderTopRadius="lg"
-          onLoad={() => setIsImageLoading(false)}
+          onLoad={() => { if(imageUrl) setIsImageLoading(false); } }
           onError={() => {
             setIsImageLoading(false);
             setImageError(true);
             console.error(`Failed to load image: ${imageUrl}`);
           }}
-          opacity={isImageLoading ? 0.5 : 1}
+          opacity={isImageLoading && !imageError ? 0.5 : 1}
           transition="opacity 0.3s ease-in-out"
+          key={displayImageUrl}
         />
-
-        {hasImages && city.image_ids.length > 1 && (
-          <>
-            <IconButton
-              aria-label="Previous image"
-              icon={<ChevronLeftIcon />} 
-              size="sm"
-              colorScheme="blackAlpha"
-              isRound
-              position="absolute"
-              left="10px"
-              top="50%"
-              transform="translateY(-50%)"
-              onClick={handlePrevImage}
-              zIndex={1}
-            />
-            <IconButton
-              aria-label="Next image"
-              icon={<ChevronRightIcon />} 
-              size="sm"
-              colorScheme="blackAlpha"
-              isRound
-              position="absolute"
-              right="10px"
-              top="50%"
-              transform="translateY(-50%)"
-              onClick={handleNextImage}
-              zIndex={1}
-            />
-          </>
-        )}
       </Box>
 
       <VStack p={4} spacing={3} align="stretch" flexGrow={1}>

@@ -12,9 +12,7 @@ from scipy.spatial.distance import cosine
 from datetime import datetime, timedelta
 import random
 from sqlalchemy.orm import Session
-import schemas # Assuming you have schemas.py
 import crud # Assuming you have crud.py
-from database import SessionLocal, engine # Assuming database setup
 
 # Initialize FastAPI app
 app = FastAPI(title="The Perfect Reunion API")
@@ -239,9 +237,13 @@ def get_recommended_cities(conn, user_email, limit=10):
         # Sort categories by importance to the user
         categories.sort(key=lambda x: user_importance.get(x["category"], 0), reverse=True)
         
+        # Fetch image ID for the city
+        image_ids = fetch_image_id_for_city(conn, city_name) # Fetch image_ids
+        
         top_cities.append({
             "name": city_name,
-            "categories": categories
+            "categories": categories,
+            "image_ids": image_ids # Include image_ids
         })
     
     return top_cities
@@ -304,9 +306,13 @@ def get_group_recommended_cities(conn, group_code, limit=10):
         # Sort categories by average importance to the group
         categories.sort(key=lambda x: avg_importance.get(x["category"], 0), reverse=True)
         
+        # Fetch image ID for the city
+        image_ids = fetch_image_id_for_city(conn, city_name) # Fetch image_ids
+        
         top_cities.append({
             "name": city_name,
-            "categories": categories
+            "categories": categories,
+            "image_ids": image_ids # Include image_ids
         })
     
     return top_cities
@@ -351,6 +357,28 @@ def update_user_importance(conn, user_email, city, vote_value):
             cursor.execute("""
             INSERT INTO ImportanceUC (email, category, importance) VALUES (?, ?, ?)
             """, (user_email, category, new_importance))
+
+def fetch_categories_for_city(conn, city_name):
+    cursor = conn.cursor()
+    cursor.execute("SELECT category, value, descr FROM CityCateg WHERE city = ?", (city_name,))
+    return [dict(row) for row in cursor.fetchall()] # Return list of dicts matching CityCategory
+
+def fetch_image_id_for_city(conn, city_name):
+    cursor = conn.cursor()
+    cursor.execute("SELECT id FROM Image WHERE city_name = ? AND \"order\" = 1", (city_name,))
+    result = cursor.fetchone()
+    return [result["id"]] if result else []
+
+# --- Image Helper Function --- 
+def get_image_from_db(conn: sqlite3.Connection, image_id: int):
+    """Fetches image data and content type directly using sqlite3 connection."""
+    cursor = conn.cursor()
+    cursor.execute("SELECT image_data, content_type FROM Image WHERE id = ?", (image_id,))
+    result = cursor.fetchone()
+    if result:
+      # Return as a simple dictionary or object
+      return {"image_data": result["image_data"], "content_type": result["content_type"]}
+    return None
 
 # --- API Endpoints ---
 
@@ -449,23 +477,18 @@ async def get_cities_for_evaluation(
     selected_cities = random.sample(remaining_cities, min(limit, len(remaining_cities)))
     
     # Get city details
-    cities = []
+    cities_data = []
     for city_name in selected_cities:
-        categories = []
-        cursor.execute("SELECT category, value, descr FROM CityCateg WHERE city = ?", (city_name,))
-        for row in cursor.fetchall():
-            categories.append({
-                "category": row["category"],
-                "value": row["value"],
-                "descr": row["descr"]
-            })
-        
-        cities.append({
+        # Fetch categories and image_id for city_name
+        categories = fetch_categories_for_city(conn, city_name) # Replace with actual fetching
+        image_ids = fetch_image_id_for_city(conn, city_name)   # Replace with actual fetching
+        cities_data.append({
             "name": city_name,
-            "categories": categories
+            "categories": categories,
+            "image_ids": image_ids
         })
     
-    return cities
+    return cities_data
 
 @app.get("/cities/{city_name}", response_model=City)
 async def get_city(city_name: str, conn = Depends(get_db)):
@@ -475,17 +498,10 @@ async def get_city(city_name: str, conn = Depends(get_db)):
     if not cursor.fetchone():
         raise HTTPException(status_code=404, detail="City not found")
     
-    # Get city categories
-    categories = []
-    cursor.execute("SELECT category, value, descr FROM CityCateg WHERE city = ?", (city_name,))
-    for row in cursor.fetchall():
-        categories.append({
-            "category": row["category"],
-            "value": row["value"],
-            "descr": row["descr"]
-        })
-    
-    return {"name": city_name, "categories": categories}
+    # Fetch categories and image_id
+    categories = fetch_categories_for_city(conn, city_name) # Replace with actual fetching
+    image_ids = fetch_image_id_for_city(conn, city_name)   # Replace with actual fetching
+    return {"name": city_name, "categories": categories, "image_ids": image_ids}
 
 @app.get("/recommendations", response_model=List[City], tags=["Recommendations"])
 async def get_recommendations(
@@ -722,15 +738,17 @@ async def get_flight_companies(conn = Depends(get_db)):
              },
              404: {"description": "Image not found"}
          },
-         tags=["Images"] # Optional: Tag for API docs
+         tags=["Images"]
         )
-def read_image(image_id: int, db: Session = Depends(get_db)):
-    db_image = crud.get_image(db, image_id=image_id) # Assumes crud.get_image exists
-    if db_image is None:
+def read_image(image_id: int, conn: sqlite3.Connection = Depends(get_db)):
+    # Use the helper function with the sqlite3 connection
+    db_image_data = get_image_from_db(conn, image_id=image_id)
+    
+    if db_image_data is None:
         raise HTTPException(status_code=404, detail="Image not found")
     
     # Return the binary data with the correct content type
-    return Response(content=db_image.image_data, media_type=db_image.content_type)
+    return Response(content=db_image_data["image_data"], media_type=db_image_data["content_type"])
 
 # Start the server with: uvicorn app:app --reload
 if __name__ == "__main__":

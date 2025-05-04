@@ -675,59 +675,71 @@ print(f"Added {votes_created} user votes for cities.")
 
 # ------------------------- IMAGE INSERTION -------------------------
 print("Starting image insertion...")
-img_folder = "IMG"  # Assumes IMG folder is in the same directory as the script
+img_folder = "img"  # Assumes IMG folder is in the same directory as the script
 images_added_count = 0
 
 if not os.path.isdir(img_folder):
     print(f"Error: Image folder '{img_folder}' not found. Skipping image insertion.")
 else:
-    # Get list of cities already inserted
     cursor.execute("SELECT name FROM City")
     db_cities = {row[0] for row in cursor.fetchall()}
-
     city_folders = [d for d in os.listdir(img_folder) if os.path.isdir(os.path.join(img_folder, d))]
     
-    for city_name in city_folders:
-        if city_name not in db_cities:
-            print(f"Warning: Folder found for city '{city_name}' but city does not exist in DB. Skipping.")
-            continue
+    for city_name_folder in city_folders: # Use a different variable name to avoid conflict
+        # Attempt to match folder name case-insensitively with DB names if needed, 
+        # but for now assume exact match or handle normalization.
+        # Let's normalize folder name for comparison:
+        normalized_city_name = city_name_folder.strip().capitalize() # Basic normalization
 
-        city_path = os.path.join(img_folder, city_name)
+        # Check if normalized name exists in DB cities
+        matched_db_city = None
+        for db_city in db_cities:
+             # Simple case-insensitive check, might need refinement
+            if db_city.lower() == normalized_city_name.lower():
+                 matched_db_city = db_city
+                 break
+
+        if not matched_db_city:
+            print(f"Warning: Folder '{city_name_folder}' does not match any city in DB. Skipping.")
+            continue
+        
+        # Use the actual DB city name from now on
+        city_name = matched_db_city 
+        city_path = os.path.join(img_folder, city_name_folder)
+
         try:
-            image_files = sorted([f for f in os.listdir(city_path) if os.path.isfile(os.path.join(city_path, f)) and f.lower().endswith(('.png', '.jpg', '.jpeg', '.webp'))])
-            
-            if len(image_files) < 3:
-                print(f"Warning: Found only {len(image_files)} images for city '{city_name}'. Expected 3. Skipping this city.")
+            # Find the first valid image file
+            first_image_file = None
+            for f in sorted(os.listdir(city_path)):
+                 if os.path.isfile(os.path.join(city_path, f)) and f.lower().endswith(('.png', '.jpg', '.jpeg', '.webp')):
+                     first_image_file = f
+                     break # Found the first one, stop looking
+
+            if not first_image_file:
+                print(f"Warning: No valid image file found for city '{city_name}'. Skipping.")
                 continue
                 
-            # Take only the first 3 images if more exist
-            images_to_insert = image_files[:3]
-            
-            for i, filename in enumerate(images_to_insert):
-                image_path = os.path.join(city_path, filename)
-                order = i + 1
+            image_path = os.path.join(city_path, first_image_file)
+            order = 1 # Always order 1
                 
-                # Read image data
-                with open(image_path, 'rb') as f:
-                    image_data = f.read()
+            with open(image_path, 'rb') as f:
+                image_data = f.read()
                 
-                # Get content type
-                content_type, _ = mimetypes.guess_type(image_path)
-                if not content_type:
-                    content_type = 'application/octet-stream' # Default if type cannot be guessed
-                    print(f"Warning: Could not guess content type for {filename}. Using default.")
+            content_type, _ = mimetypes.guess_type(image_path)
+            if not content_type:
+                content_type = 'application/octet-stream'
+                print(f"Warning: Could not guess content type for {first_image_file}. Using default.")
                 
-                # Insert into DB
-                try:
-                    cursor.execute("""
-                    INSERT INTO Image (city_name, image_data, content_type, "order")
-                    VALUES (?, ?, ?, ?)
-                    """, (city_name, image_data, content_type, order))
-                    images_added_count += 1
-                except sqlite3.IntegrityError:
-                     print(f"Warning: Image for city '{city_name}' order {order} likely already exists. Skipping.")
-                except sqlite3.Error as db_err:
-                    print(f"Error inserting image {filename} for city {city_name}: {db_err}")
+            try:
+                cursor.execute("""
+                INSERT INTO Image (city_name, image_data, content_type, "order")
+                VALUES (?, ?, ?, ?)
+                """, (city_name, image_data, content_type, order))
+                images_added_count += 1
+            except sqlite3.IntegrityError:
+                 print(f"Warning: Image for city '{city_name}' order {order} likely already exists. Skipping.")
+            except sqlite3.Error as db_err:
+                print(f"Error inserting image {first_image_file} for city {city_name}: {db_err}")
         
         except Exception as e:
             print(f"Error processing folder {city_path}: {e}")
