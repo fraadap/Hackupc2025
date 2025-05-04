@@ -76,6 +76,7 @@ const GroupDetail: React.FC = () => {
 
   const [flightSearch, setFlightSearch] = useState<FlightSearch>({
     departure_city: '',
+    arrival_city: '', // Added arrival city
     min_date: '2025-05-10', // Keep default dates
     max_date: '2025-05-15',
     max_budget: undefined,
@@ -179,21 +180,40 @@ const GroupDetail: React.FC = () => {
   const handleSearchFlights = async () => {
     if (!flightSearch.departure_city) {
       setFlightError('Please select a departure city');
-      toast({ title: 'Missing Departure City', description: 'Please select a city to fly from.', status: 'warning', duration: 3000, isClosable: true });
+      toast({
+        title: 'Missing Departure City',
+        description: 'Please select a city to fly from.',
+        status: 'warning',
+        duration: 3000,
+        isClosable: true,
+      });
       return;
     }
 
     try {
       setFlightsLoading(true);
       setFlightError(null);
-      const results = await searchFlights(flightSearch);
-      setFlights(results);
 
-      const displayedFlights = Math.min(results.length, 10); // Cap the number of flights at 10
-      if (results.length > 0) {
+      // Fetch flights based on search criteria
+      const results = await searchFlights(flightSearch);
+
+      // Filter flights based on departure and arrival cities
+      const filteredFlights = results.filter((flight) => {
+        const matchesDeparture = flight.depCity === flightSearch.departure_city;
+        const matchesArrival = flightSearch.arrival_city
+          ? flight.arrCity === flightSearch.arrival_city
+          : true;
+
+        return matchesDeparture && matchesArrival;
+      });
+
+      setFlights(filteredFlights);
+
+      const displayedFlights = Math.min(filteredFlights.length, 10); // Cap the number of flights at 10
+      if (filteredFlights.length > 0) {
         toast({
           title: 'Flights Found',
-          description: `Displaying ${displayedFlights} of ${results.length} flight options.`,
+          description: `Displaying ${displayedFlights} of ${filteredFlights.length} flight options.`,
           status: 'success',
           duration: 3000,
           isClosable: true,
@@ -461,6 +481,25 @@ const GroupDetail: React.FC = () => {
                   </Select>
                 </FormControl>
 
+                <FormControl>
+                  <FormLabel htmlFor="arrival_city">Arrival City</FormLabel>
+                  <Select
+                    id="arrival_city"
+                    name="arrival_city"
+                    placeholder="Select arrival city"
+                    value={flightSearch.arrival_city}
+                    onChange={handleFlightSearchChange}
+                  >
+                    {cityList.map((city) => (
+                      <option key={city} value={city}>
+                        {city}
+                      </option>
+                    ))}
+                  </Select>
+                </FormControl>
+              </SimpleGrid>
+              
+              <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6} mb={6}>
                 <FormControl>
                   <FormLabel htmlFor="companies">Airlines (Optional)</FormLabel>
                   <Select
