@@ -50,3 +50,13 @@ This project was a great learning experience, particularly in:
 *   **UI Refinement:** While basic functionality is in place, achieving a polished and fully responsive UI with libraries like Material UI takes significant time.
 
 Overall, "The Perfect Reunion" was a challenging but rewarding project that brought together various aspects of web development to solve a common real-world problem. 
+
+## Screenshots 📷
+![swipe](https://github.com/user-attachments/assets/eb408cba-93f0-4caf-813f-9cc25b7cc47c)
+![dashboard](https://github.com/user-attachments/assets/0a8b1511-1da5-484f-ab9d-511ce605085d)
+![groups](https://github.com/user-attachments/assets/f0629727-1d1c-4da2-bf4f-907ec769ed9c)
+![search](https://github.com/user-attachments/assets/222883b7-bd87-4d6f-87a1-79df4b546f86)
+![deatails](https://github.com/user-attachments/assets/7619366a-0543-47f2-a740-7e1d90f77a1d)
+
+
+
